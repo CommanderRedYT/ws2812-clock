@@ -4,4 +4,5 @@
   (lib (name "tactile_button")(type "KiCad")(uri "${KIPRJMOD}/external/tactile/tactile_button.kicad_sym")(options "")(descr ""))
   (lib (name "barrel_jack")(type "KiCad")(uri "${KIPRJMOD}/external/barrel_jack/barrel_jack.kicad_sym")(options "")(descr ""))
   (lib (name "reverse_polarity_diode")(type "KiCad")(uri "${KIPRJMOD}/external/reverse_polarity_diode/reverse_polarity_diode.kicad_sym")(options "")(descr ""))
+  (lib (name "bme280")(type "KiCad")(uri "${KIPRJMOD}/external/bme280/bme280.kicad_sym")(options "")(descr ""))
 )
