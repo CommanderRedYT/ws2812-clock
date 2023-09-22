@@ -493,7 +493,7 @@
       "idf": "",
       "netlist": "",
       "specctra_dsn": "",
-      "step": "",
+      "step": "ws2812-clock.step",
       "vrml": ""
     },
     "page_layout_descr_file": ""
