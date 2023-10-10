@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WS2812B</title>
+
+    <!-- Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+
+    <!-- Bootstrap -->
+    <script src="/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="/bootstrap.min.css">
+
+    <!-- jQuery -->
+    <script src="/jquery.min.js"></script>
+
+    <!-- Custom -->
+    <script src="/js/main.js" defer type="module"></script>
+    <script src="/js/api.js" defer type="module"></script>
+</head>
+<body>
+    <div>
+        <h1>
+            servus
+        </h1>
+        <pre id="status"></pre>
+        <pre id="config"></pre>
+        <pre id="animations"></pre>
+        <pre id="ota"></pre>
+        <form id="setKey">
+            <!--<input type="text" name="key" id="key" placeholder="key">-->
+            <select name="key" id="key"></select>
+            <input type="text" name="value" id="value" placeholder="value">
+            <input type="submit" type="button" value="set" id="set">
+        </form>
+        <form id="triggerOtaForm" action="/api/v1/triggerOta" method="get">
+            <input type="url" name="url" id="url" placeholder="url">
+            <input type="submit" type="button" value="trigger OTA" id="triggerOta">
+        </form>
+    </div>
+</body>
+</html>

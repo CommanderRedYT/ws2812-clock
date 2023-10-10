@@ -1,0 +1,2 @@
+#!/bin/bash
+idf.py -p /dev/ttyACM0 -b 115200 monitor

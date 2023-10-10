@@ -1,0 +1,54 @@
+[submodule "firmware/esp-idf"]
+	path = firmware/esp-idf
+	url = git@github.com:espressif/esp-idf.git
+[submodule "firmware/components/arduino-esp32"]
+	path = firmware/components/arduino-esp32
+	url = git@github.com:CommanderRedYT/arduino-esp32.git
+[submodule "firmware/components/fmt"]
+	path = firmware/components/fmt
+	url = git@github.com:CommanderRedYT/fmt.git
+[submodule "firmware/components/ArduinoJson"]
+	path = firmware/components/ArduinoJson
+	url = git@github.com:CommanderRedYT/ArduinoJson.git
+[submodule "firmware/components/expected"]
+	path = firmware/components/expected
+	url = git@github.com:CommanderRedYT/expected.git
+[submodule "firmware/components/espchrono"]
+	path = firmware/components/espchrono
+	url = git@github.com:CommanderRedYT/espchrono.git
+[submodule "firmware/components/cpputils"]
+	path = firmware/components/cpputils
+	url = git@github.com:CommanderRedYT/cpputils.git
+[submodule "firmware/components/espcpputils"]
+	path = firmware/components/espcpputils
+	url = git@github.com:CommanderRedYT/espcpputils.git
+[submodule "firmware/components/date"]
+	path = firmware/components/date
+	url = git@github.com:CommanderRedYT/date.git
+[submodule "firmware/components/FastLED-idf"]
+	path = firmware/components/FastLED-idf
+	url = git@github.com:CommanderRedYT/FastLED-idf.git
+[submodule "firmware/components/espconfiglib"]
+	path = firmware/components/espconfiglib
+	url = git@github.com:CommanderRedYT/espconfiglib.git
+[submodule "firmware/components/espwifistack"]
+	path = firmware/components/espwifistack
+	url = git@github.com:CommanderRedYT/espwifistack.git
+[submodule "firmware/components/sunset-idf"]
+	path = firmware/components/sunset-idf
+	url = git@github.com:CommanderRedYT/sunset-idf.git
+[submodule "firmware/components/esphttpdutils"]
+	path = firmware/components/esphttpdutils
+	url = git@github.com:CommanderRedYT/esphttpdutils.git
+[submodule "firmware/components/cxx-ring-buffer"]
+	path = firmware/components/cxx-ring-buffer
+	url = git@github.com:CommanderRedYT/cxx-ring-buffer.git
+[submodule "firmware/esp-protocols"]
+	path = firmware/esp-protocols
+	url = git@github.com:espressif/esp-protocols.git
+[submodule "firmware/components/esp-idf-bmx280"]
+	path = firmware/components/esp-idf-bmx280
+	url = git@github.com:CommanderRedYT/esp-idf-bmx280.git
+[submodule "firmware/components/espasyncota"]
+	path = firmware/components/espasyncota
+	url = git@github.com:CommanderRedYT/espasyncota.git

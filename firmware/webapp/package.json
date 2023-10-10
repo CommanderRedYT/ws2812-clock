@@ -1,0 +1,27 @@
+{
+  "name": "webapp",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/CommanderRedYT/ws2812-clock",
+  "author": "CommanderRedYT",
+  "license": "GPL-3.0",
+  "type": "module",
+  "scripts": {
+    "build": "tools/web_codegen.js",
+    "dev": "tools/serve.js"
+  },
+  "dependencies": {
+    "bootstrap": "^5.3.2",
+    "express": "^4.18.2",
+    "jquery": "^3.7.1",
+    "mime-types": "^2.1.35",
+    "minify": "^10.5.2",
+    "node-gzip": "^1.1.2",
+    "process": "^0.11.10"
+  },
+  "devDependencies": {
+    "@types/mime-types": "^2.1.2",
+    "@types/minify": "^9.1.2",
+    "@types/node-gzip": "^1.1.1"
+  }
+}
