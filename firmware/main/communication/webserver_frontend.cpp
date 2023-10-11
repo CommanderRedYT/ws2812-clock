@@ -88,10 +88,12 @@ void webserver_frontend_setup(httpd_handle_t handle)
         }
     }
 
+    /*
     if (const auto res = httpd_register_err_handler(handle, HTTPD_404_NOT_FOUND, handle_not_found); res != ESP_OK)
     {
         ESP_LOGE(TAG, "Failed to register 404 handler: %s", esp_err_to_name(res));
     }
+    */
 }
 
 } // namespace webserver

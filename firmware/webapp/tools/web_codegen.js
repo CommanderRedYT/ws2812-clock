@@ -82,7 +82,8 @@ auto get_handlers()
 const TEMPLATE_H_FILE_REGISTER_WEBAPP = `        httpd_uri_t{ .uri = "/{{original_name}}", .method = HTTP_GET, .handler = {{name}}_handler, .user_ctx = nullptr },\n`;
 
 const TEMPLATE_H_FILE_REGISTER_WEBAPP_END = `
-        httpd_uri_t{ .uri = "/", .method = HTTP_GET, .handler = captive_portal_handler, .user_ctx = (void*)&index_html_handler }
+        // httpd_uri_t{ .uri = "/", .method = HTTP_GET, .handler = captive_portal_handler, .user_ctx = (void*)&index_html_handler }
+        httpd_uri_t{ .uri = "/", .method = HTTP_GET, .handler = index_html_handler, .user_ctx = nullptr }
     );
 }
 `;
