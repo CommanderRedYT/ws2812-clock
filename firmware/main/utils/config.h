@@ -349,6 +349,13 @@ public:
         std::string defaultValue() const final { return "ws2812b-clock"; }
         ConfigConstraintReturnType checkValue(value_t value) const final { return StringMinMaxSize<1, 64>(value); }
     } mqttTopic;
+    struct : ConfigWrapper<std::string>
+    {
+        bool allowReset() const final { return true; }
+        const char *nvsName() const final { return "hassMqttTopic"; }
+        std::string defaultValue() const final { return "homeassistant/"; }
+        ConfigConstraintReturnType checkValue(value_t value) const final { return StringMinMaxSize<1, 64>(value); }
+    } hassMqttTopic;
 
     // Customization
     /*-- Hide Clock while NTP sync has not finished --*/
@@ -477,6 +484,7 @@ public:
         ITER_CONFIG(mqttEnabled)
         ITER_CONFIG(mqttUrl)
         ITER_CONFIG(mqttTopic)
+        ITER_CONFIG(hassMqttTopic)
 
         // Customization
         ITER_CONFIG(showUnsyncedTime)

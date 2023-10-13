@@ -38,6 +38,7 @@ enum class MqttState
 
 std::string lastMqttUrl;
 espchrono::millis_clock::time_point lastMqttPublish;
+espchrono::millis_clock::time_point lastMqttHassPublish;
 
 } // namespace
 
@@ -135,6 +136,79 @@ void publishStatus()
     });
 
     lastMqttPublish = espchrono::millis_clock::now();
+}
+
+void publishHomeassistantDiscovery()
+{
+    // hard code for the bme
+#ifdef HARDWARE_USE_BME280
+    // {mqttTopic}/{hostname}/status/bme280/temp: 25 (°C)
+    // {mqttTopic}/{hostname}/status/bme280/pressure (hPa)
+    // {mqttTopic}/{hostname}/status/bme280/humidity (%)
+    // {mqttTopic}/{hostname}/status/bme280/altitude (m)
+    std::string payload;
+
+    constexpr const char * const FORMAT_STR = R"({{
+        "name": "{}{}",
+        "device_class": "{}",
+        "state_topic": "{}/{}/status/bme280/{}",
+        "unit_of_measurement": "°C",
+        "value_template": "{{{{ value_json.{} }}}}"
+    }})";
+
+    payload = fmt::format(
+            FORMAT_STR,
+            "Temperature",
+            configs.hostname.value(),
+            "temperature",
+            configs.mqttTopic.value(),
+            configs.hostname.value(),
+            "temp",
+            "temp"
+        );
+    publishQueue.push(std::make_tuple(fmt::format("{}sensor/{}/temp/config", configs.hassMqttTopic.value(), configs.hostname.value()), payload));
+
+    payload = fmt::format(
+            FORMAT_STR,
+            "Pressure",
+            configs.hostname.value(),
+            "pressure",
+            configs.mqttTopic.value(),
+            configs.hostname.value(),
+            "pressure",
+            "pressure"
+        );
+
+    publishQueue.push(std::make_tuple(fmt::format("{}sensor/{}/pressure/config", configs.hassMqttTopic.value(), configs.hostname.value()), payload));
+
+    payload = fmt::format(
+            FORMAT_STR,
+            "Humidity",
+            configs.hostname.value(),
+            "humidity",
+            configs.mqttTopic.value(),
+            configs.hostname.value(),
+            "humidity",
+            "humidity"
+        );
+
+    publishQueue.push(std::make_tuple(fmt::format("{}sensor/{}/humidity/config", configs.hassMqttTopic.value(), configs.hostname.value()), payload));
+
+    payload = fmt::format(
+            FORMAT_STR,
+            "Altitude",
+            configs.hostname.value(),
+            "altitude",
+            configs.mqttTopic.value(),
+            configs.hostname.value(),
+            "altitude",
+            "altitude"
+        );
+
+    publishQueue.push(std::make_tuple(fmt::format("{}sensor/{}/altitude/config", configs.hassMqttTopic.value(), configs.hostname.value()), payload));
+#endif
+
+    lastMqttHassPublish = espchrono::millis_clock::now();
 }
 
 void event_handler(void*, esp_event_base_t event_base, int32_t event_id_arg, void *event_data)
@@ -354,6 +428,11 @@ void update()
     if (mqttState == MqttState::Connected && espchrono::ago(lastMqttPublish) > 1s)
     {
         publishStatus();
+    }
+
+    if (mqttState == MqttState::Connected && espchrono::ago(lastMqttHassPublish) > 30s)
+    {
+        publishHomeassistantDiscovery();
     }
 }
 
