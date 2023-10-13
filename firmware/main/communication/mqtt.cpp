@@ -2,8 +2,14 @@
 
 constexpr const char * const TAG = "mqtt";
 
+// system includes
+#include <tuple>
+
 // 3rdparty lib includes
+#include <cleanuphelper.h>
+#include <lockingqueue.h>
 #include <recursivelockhelper.h>
+#include <taskutils.h>
 #include <wrappers/mqtt_client.h>
 
 // local includes
@@ -17,6 +23,8 @@ namespace mqtt {
 espcpputils::mqtt_client client;
 
 namespace {
+
+espcpputils::LockingQueue<std::tuple<std::string, std::string>> publishQueue;
 
 enum class MqttState
 {
@@ -81,6 +89,35 @@ std::string format_error(esp_mqtt_error_codes_t* error_handle)
     return fmt::format("error_type: {}, connect_return_code: {}", error_type, connect_return_code);
 }
 
+[[noreturn]] void mqtt_handle_send(void*)
+{
+    auto helper = cpputils::makeCleanupHelper([](){ vTaskDelete(nullptr); });
+
+    while (true)
+    {
+        while (auto entry = publishQueue.tryPop())
+        {
+            espcpputils::RecursiveLockHelper guard{global::global_lock->handle};
+
+            if (!client)
+            {
+                ESP_LOGE(TAG, "mqtt_send_handle: client not initialized");
+                publishQueue.clear();
+                continue;
+            }
+
+            if (client.publish(std::get<0>(*entry), std::get<1>(*entry), 0, 1) < 0)
+            {
+                ESP_LOGE(TAG, "mqtt_send_handle: publish failed");
+                publishQueue.clear();
+                continue;
+            }
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(100)); // delay 100ms
+    }
+}
+
 void publishStatus()
 {
     status::forEveryKey([&](const JsonString& key, const JsonVariant& value){
@@ -90,9 +127,9 @@ void publishStatus()
 
         serializeJson(value, valueBuffer);
 
-        client.publish(topic, valueBuffer, 0, true);
+        publishQueue.push(std::make_tuple(topic, valueBuffer));
 
-        ESP_LOGI(TAG, "publishStatus: %s=%s", topic.c_str(), valueBuffer.c_str());
+        // ESP_LOGI(TAG, "publishStatus: %s=%s", topic.c_str(), valueBuffer.c_str());
 
         return ESP_OK;
     });
@@ -173,6 +210,14 @@ void init(std::string_view url)
     client = {};
     lastMqttUrl = {};
     mqttState = MqttState::NotStarted;
+
+    const auto result = espcpputils::createTask(mqtt_handle_send, "mqttSend", 4096, nullptr, 5, nullptr, espcpputils::CoreAffinity::Both);
+    if (result != pdPASS)
+    {
+        auto msg = fmt::format("failed creating mqtt task {}", result);
+        ESP_LOGE(TAG, "%.*s", msg.size(), msg.data());
+        return;
+    }
 
     esp_mqtt_client_config_t mqtt_cfg{
         .broker = {

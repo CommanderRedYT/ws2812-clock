@@ -39,7 +39,7 @@ SchedulerTask tasksArray[]{
     SchedulerTask{"espclock",  espclock::begin,      espclock::update,   10ms},
     SchedulerTask{"webserver", webserver::begin,     noop              , 50ms},
     SchedulerTask{"beeper",    beeper::begin,        beeper::update,     20ms},
-    SchedulerTask{"mqtt",      mqtt::begin,          mqtt::update,       10ms},
+    SchedulerTask{"mqtt",      mqtt::begin,          mqtt::update,      500ms},
     SchedulerTask{"ota",       ota::begin,           ota::update,       100ms},
 };
 
