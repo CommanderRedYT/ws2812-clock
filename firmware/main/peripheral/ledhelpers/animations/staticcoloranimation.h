@@ -13,7 +13,7 @@ class StaticColorAnimation : public LedAnimation
 
     constexpr bool rendersOnce() const override { return true; }
 
-private:
+    cpputils::ColorHelper getPrimaryColor() const { return cpputils::ColorHelper{0, 0, 0}; }
 
     void render_segment(SevenSegmentDigit::Segment segment, SevenSegmentDigit& sevenSegmentDigit, CRGB* leds, size_t leds_length) override;
 

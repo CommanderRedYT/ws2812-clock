@@ -20,7 +20,7 @@ const parseValue = (config, enumWithPrefix = false) => {
 
 const inputFromType = (config, type) => {
     switch (type) {
-        case "enum":
+        case "enum": {
             const select = document.createElement("select");
             const values = config.value.values;
 
@@ -38,16 +38,19 @@ const inputFromType = (config, type) => {
             select.setAttribute("value", config.value.value);
 
             return select;
-        case "text":
+        }
+        case "text": {
             const text = document.createElement("input");
             text.setAttribute("type", "text");
             text.setAttribute("value", JSON.stringify(config.value));
             return text;
-        default:
+        }
+        default: {
             const element = document.createElement("p");
             console.warn("unknown type", type);
             element.innerText = "unknown type";
             return element;
+        }
     }
 };
 

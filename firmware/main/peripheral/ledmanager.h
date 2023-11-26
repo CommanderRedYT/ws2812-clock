@@ -46,6 +46,10 @@ public:
 
     static uint16_t getFps();
 
+    uint8_t getBrightness() const { return m_brightness; }
+
+    bool isVisible() const { return m_visible && m_brightness > 0; }
+
 private:
 
     std::string toString() const;

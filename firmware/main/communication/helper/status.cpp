@@ -8,12 +8,20 @@
 // local includes
 #include "communication/webserver_api.h"
 #include "peripheral/bme280.h"
+#include "peripheral/ledhelpers/ledanimation.h"
 #include "peripheral/ledmanager.h"
+#include "utils/config.h"
 
 using namespace webserver;
 using namespace std::chrono_literals;
 
 namespace status {
+
+namespace {
+double round2(double value) {
+    return (int)(value * 100 + 0.5) / 100.0;
+}
+} // namespace
 
 esp_err_t generateStatusJson(JsonObject& statusObj)
 {
@@ -39,6 +47,25 @@ esp_err_t generateStatusJson(JsonObject& statusObj)
         else
         {
             ledObj["fps"] = ledManager->getFps();
+            ledObj["brightness"] = ledManager->getBrightness();
+            ledObj["visible"] = ledManager->isVisible();
+            if (animation::currentAnimation)
+                ledObj["animation"] = toString(animation::currentAnimation->getEnumValue());
+            else
+                ledObj["animation"] = nullptr;
+
+            JsonObject hassObj = ledObj.createNestedObject("homeassistant");
+            hassObj["brightness"] = ledManager->getBrightness();
+            hassObj["state"] = ledManager->isVisible() ? "ON" : "OFF";
+            if (animation::currentAnimation)
+                hassObj["animation"] = toString(animation::currentAnimation->getEnumValue());
+            else
+                hassObj["animation"] = nullptr;
+
+            auto &primaryColor = configs.primaryColor.value();
+            hassObj["r"] = primaryColor.r;
+            hassObj["g"] = primaryColor.g;
+            hassObj["b"] = primaryColor.b;
         }
     }
 
@@ -51,10 +78,10 @@ esp_err_t generateStatusJson(JsonObject& statusObj)
         }
         else
         {
-            bme280obj["temp"] = res->temperature;
-            bme280obj["pressure"] = res->pressure;
-            bme280obj["humidity"] = res->humidity;
-            bme280obj["altitude"] = res->altitude;
+            bme280obj["temp"] = round2(res->temperature);
+            bme280obj["pressure"] = round2(res->pressure);
+            bme280obj["humidity"] = round2(res->humidity);
+            bme280obj["altitude"] = round2(res->altitude);
             bme280obj["millis_ts"] = res->timestamp.time_since_epoch() / 1ms;
         }
     }

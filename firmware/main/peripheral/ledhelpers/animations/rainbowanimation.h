@@ -13,14 +13,13 @@ class RainbowAnimation : public LedAnimation
 
     constexpr bool rendersOnce() const override { return true; }
 
-private:
-
     void update() override;
 
     void render_all(CRGB* leds, size_t leds_length) override;
 
     LedAnimationName getEnumValue() const override { return LedAnimationName::Rainbow; }
 
+private:
     uint8_t m_hue{0};
 };
 

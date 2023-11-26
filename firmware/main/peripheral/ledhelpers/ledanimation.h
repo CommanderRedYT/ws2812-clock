@@ -6,9 +6,10 @@
 #include <string>
 
 // 3rdparty lib includes
-#include "FastLED.h"
-#include "arrayview.h"
-#include "espchrono.h"
+#include <FastLED.h>
+#include <arrayview.h>
+#include <color_utils.h>
+#include <espchrono.h>
 
 // local includes
 #include "peripheral/ledmanager.h"
@@ -61,6 +62,8 @@ public:
     virtual LedAnimationName getEnumValue() const = 0;
 
     virtual espchrono::milliseconds32 getUpdateInterval() const = 0;
+
+    virtual cpputils::ColorHelper getPrimaryColor() const { return cpputils::ColorHelper{0, 0, 0}; }
 
     virtual constexpr bool rendersOnce() const { return false; }
 
