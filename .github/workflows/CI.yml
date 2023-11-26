@@ -44,7 +44,7 @@ jobs:
       - name: Install dependencies
         run: |
           npm install -g yarn
-          cd repository/webapp
+          cd repository/firmware/webapp
           yarn install
 
   install-idf:
