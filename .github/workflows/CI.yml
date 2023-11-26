@@ -1,7 +1,14 @@
 name: CI
+#on:
+#  workflow_dispatch:
+#  push:
+
+# only when this file or something in firmware/ changes
 on:
-  workflow_dispatch:
   push:
+      paths:
+      - .github/**
+      - firmware/**
 
 jobs:
   checkout:
@@ -15,11 +22,30 @@ jobs:
           path: repository
           key: ${{ runner.os }}-repository-${{ github.sha }}
 
+      - name: Cache npm & yarn
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      - name: Set Node.js 16.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
           path: repository
           submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          npm install -g yarn
+          cd repository/webapp
+          yarn install
 
   install-idf:
     runs-on: ubuntu-latest
