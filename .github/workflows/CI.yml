@@ -6,7 +6,7 @@ on:
 jobs:
   checkout:
     runs-on: ubuntu-latest
-    name: Checkout (with submodules)
+    name: Checkout
     steps:
       - name: Cache repository
         uses: actions/cache@v2
