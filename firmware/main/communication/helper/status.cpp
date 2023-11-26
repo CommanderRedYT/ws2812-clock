@@ -55,17 +55,18 @@ esp_err_t generateStatusJson(JsonObject& statusObj)
                 ledObj["animation"] = nullptr;
 
             JsonObject hassObj = ledObj.createNestedObject("homeassistant");
-            hassObj["brightness"] = ledManager->getBrightness();
-            hassObj["state"] = ledManager->isVisible() ? "ON" : "OFF";
+            hassObj["brightness"] = configs.ledBrightness.value();
+            hassObj["state"] = configs.ledAnimationEnabled.value() ? "ON" : "OFF";
             if (animation::currentAnimation)
-                hassObj["animation"] = toString(animation::currentAnimation->getEnumValue());
+                hassObj["effect"] = toString(animation::currentAnimation->getEnumValue());
             else
-                hassObj["animation"] = nullptr;
+                hassObj["effect"] = nullptr;
 
             auto &primaryColor = configs.primaryColor.value();
-            hassObj["r"] = primaryColor.r;
-            hassObj["g"] = primaryColor.g;
-            hassObj["b"] = primaryColor.b;
+            JsonObject colorObj = hassObj.createNestedObject("color");
+            colorObj["r"] = primaryColor.r;
+            colorObj["g"] = primaryColor.g;
+            colorObj["b"] = primaryColor.b;
         }
     }
 

@@ -450,6 +450,13 @@ public:
             return {};
         }
     } ledAnimation;
+    struct : ConfigWrapper<bool>
+    {
+        bool allowReset() const final { return true; }
+        const char *nvsName() const final { return "ledAnimationEna"; }
+        value_t defaultValue() const final { return true; }
+        ConfigConstraintReturnType checkValue(value_t value) const final { return {}; }
+    } ledAnimationEnabled;
     struct : ConfigWrapper<ColorHelper>
     {
         bool allowReset() const final { return true; }
@@ -567,6 +574,7 @@ public:
         // Customization
         ITER_CONFIG(showUnsyncedTime)
         ITER_CONFIG(ledAnimation)
+        ITER_CONFIG(ledAnimationEnabled)
         ITER_CONFIG(primaryColor)
         ITER_CONFIG(secondaryColor)
         ITER_CONFIG(tertiaryColor)
