@@ -1,0 +1,175 @@
+name: CI
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  checkout:
+    runs-on: ubuntu-latest
+    name: Checkout (with submodules)
+    steps:
+      - name: Cache repository
+        uses: actions/cache@v2
+        id: cache-repository
+        with:
+          path: repository
+          key: ${{ runner.os }}-repository-${{ github.sha }}
+
+      - name: Checkout (without submodules)
+        uses: actions/checkout@v2
+        with:
+          path: repository
+
+      - name: Fast Submodule Checkout esp-idf
+        uses: 0xFEEDC0DE64/fast_submodule_checkout@main
+        with:
+          submodule: firmware/esp-idf
+          repo: repository
+
+      - name: Fast Submodule Checkout components/arduino-esp32
+        uses: 0xFEEDC0DE64/fast_submodule_checkout@main
+        with:
+          submodule: firmware/components/arduino-esp32
+          repo: repository
+
+      - name: Checkout remaining submodules
+        run: | 
+          cd firmware
+          git -C repository submodule update --init --recursive $(git -C repository submodule | awk '{ if ($2 != "esp-idf" && $2 != "components/arduino-esp32") print $2 }')
+
+  checkout-history:
+    runs-on: ubuntu-latest
+    name: Checkout (with history and submodules)
+    steps:
+      - name: Cache repository
+        uses: actions/cache@v2
+        id: cache-repository
+        with:
+          path: repository
+          key: ${{ runner.os }}-repository-history-${{ github.sha }}
+
+      - name: Checkout (without submodules)
+        uses: actions/checkout@v2
+        with:
+          path: repository
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: Fast Submodule Checkout esp-idf
+        uses: 0xFEEDC0DE64/fast_submodule_checkout@main
+        with:
+          submodule: firmware/esp-idf
+          repo: repository
+
+      - name: Fast Submodule Checkout components/arduino-esp32
+        uses: 0xFEEDC0DE64/fast_submodule_checkout@main
+        with:
+          submodule: firmware/components/arduino-esp32
+          repo: repository
+
+      - name: Checkout remaining submodules
+        run: |
+          cd firmware
+          git -C repository submodule update --init --recursive $(git -C repository submodule | awk '{ if ($2 != "esp-idf" && $2 != "components/arduino-esp32") print $2 }')
+
+  install-idf:
+    runs-on: ubuntu-latest
+    name: Install esp-idf
+    needs:
+      - checkout
+    steps:
+      - name: Cache repository
+        uses: actions/cache@v2
+        id: cache-repository
+        with:
+          path: repository
+          key: ${{ runner.os }}-repository-${{ github.sha }}
+
+      - name: Verify that "Cache repostory" had a hit
+        if: ${{ steps.cache-repository.outputs.cache-hit != 'true' }}
+        run: exit 1
+
+      - name: Get esp-idf release name
+        id: get-esp-idf-release
+        uses: 0xFEEDC0DE64/get_latest_tag@main
+        with:
+          repo: repository/firmware/esp-idf
+
+      - name: Cache .espressif
+        id: cache-espressif
+        uses: actions/cache@v2
+        with:
+          path: ~/.espressif
+          key: ${{ runner.os }}-espressif-${{ steps.get-esp-idf-release.outputs.tag_name }}
+
+      - name: Install .espressif dependencies
+        if: ${{ steps.cache-espressif.outputs.cache-hit != 'true' }}
+        run: repository/firmware/esp-idf/install.sh
+
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [bme280]
+    name: ${{ matrix.node }}
+    needs:
+      - checkout
+      - install-idf
+    steps:
+      - name: Cache repository
+        uses: actions/cache@v2
+        id: cache-repository
+        with:
+          path: repository
+          key: ${{ runner.os }}-repository-${{ github.sha }}
+
+      - name: Verify that "Cache repostory" had a hit
+        if: ${{ steps.cache-repository.outputs.cache-hit != 'true' }}
+        run: exit 1
+
+      - name: Get esp-idf release name
+        id: get-esp-idf-release
+        uses: 0xFEEDC0DE64/get_latest_tag@main
+        with:
+          repo: repository/firmware/esp-idf
+
+      - name: Cache .espressif
+        id: cache-espressif
+        uses: actions/cache@v2
+        with:
+          path: ~/.espressif
+          key: ${{ runner.os }}-espressif-${{ steps.get-esp-idf-release.outputs.tag_name }}
+
+      - name: Verify that "Cache .espressif" had a hit
+        if: ${{ steps.cache-espressif.outputs.cache-hit != 'true' }}
+        run: |
+          echo "Cache .espressif did not hit? Did the prepare step run successfully?"
+          exit 1
+
+      - name: Setup ccache
+        uses: 0xFEEDC0DE64/setup_ccache@main
+        with:
+          key: ${{ runner.os }}-ccache-${{ matrix.node }}
+
+      - name: Build firmware
+        run: |
+          cd repository/firmware
+          export CCACHE_MAXSIZE=1024M CCACHE_BASEDIR="$(pwd)"
+          ./esp-idf/install.sh
+          . export.sh
+          ./switchconf.sh ${{ matrix.node }}
+          idf.py --ccache build
+          ccache -s
+
+      - name: Set outputs
+        id: vars
+        run: |
+          echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+          echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v2.2.4
+        with:
+          name: clock_${{ matrix.node }}
+          path: |
+            repository/firmware/build_${{ matrix.node }}/bobbyquad_${{ matrix.node }}.bin
