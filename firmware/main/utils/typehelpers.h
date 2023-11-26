@@ -18,7 +18,6 @@ struct is_duration<std::chrono::duration<Rep, Period>> : std::true_type {};
 template <typename _Tp>
 inline constexpr bool is_duration_v = is_duration<_Tp>::value;
 
-using namespace std;
 template<typename T>
 struct t_to_str
 {
@@ -51,14 +50,18 @@ const char *t_to_str<T>::str = "unknown";
     x(uint64_t) \
     x(float) \
     x(double) \
-    x(string) \
+    x(std::string) \
     x(sntp_sync_mode_t) \
     x(espchrono::DayLightSavingMode) \
     x(wifi_auth_mode_t) \
     x(wifi_stack::mac_t) \
     x(wifi_stack::ip_address_t) \
     x(espchrono::milliseconds32) \
-    x(espchrono::minutes32)
+    x(espchrono::minutes32) \
+    x(espchrono::seconds32) \
+    x(SecondaryBrightnessMode) \
+    x(LedAnimationName) \
+    x(cpputils::ColorHelper)
 
 #define DEFINE_FOR_TYPE(TYPE) DEFINE_FOR_TYPE2(TYPE, TYPE)
 TYPE_VALUES(DEFINE_FOR_TYPE)

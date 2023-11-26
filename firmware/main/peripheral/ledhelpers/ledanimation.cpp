@@ -28,14 +28,14 @@ const LedAnimation& getFirstAnimation()
     return *animations[0];
 }
 
-std::expected<void, std::string> updateAnimation(const char* name, ledmanager::LedArray& leds)
+std::expected<void, std::string> updateAnimation(LedAnimationName enumValue, ledmanager::LedArray& leds)
 {
-    if (currentAnimation != nullptr && currentAnimation->getName() == name)
+    if (currentAnimation != nullptr && currentAnimation->getEnumValue() == enumValue)
         return {};
 
     for (auto animation : animations)
     {
-        if (strcmp(animation->getName(), name) == 0)
+        if (animation->getEnumValue() == enumValue)
         {
             if (currentAnimation)
                 // void stop(CRGB* startLed, CRGB* endLed)
@@ -46,19 +46,14 @@ std::expected<void, std::string> updateAnimation(const char* name, ledmanager::L
         }
     }
 
-    return std::unexpected(fmt::format("Animation '{}' not found", name));
+    return std::unexpected(fmt::format("Animation '{}' not found ({})", toString(enumValue), std::to_underlying(enumValue)));
 }
 
-bool animationExists(const char* name)
+bool animationExists(LedAnimationName enumValue)
 {
-    return std::ranges::any_of(animations, [name](const LedAnimation* animation) {
-        return strcmp(animation->getName(), name) == 0;
+    return std::ranges::any_of(animations, [enumValue](const LedAnimation* animation) {
+        return animation->getEnumValue() == enumValue;
     });
-}
-
-bool animationExists(const std::string& name)
-{
-    return animationExists(name.c_str());
 }
 
 bool LedAnimation::needsUpdate() const

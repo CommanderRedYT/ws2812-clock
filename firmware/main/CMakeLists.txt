@@ -53,6 +53,13 @@ add_dependencies(${COMPONENT_LIB} webserver_files)
 set_property(DIRECTORY "${COMPONENT_DIR}" APPEND PROPERTY
         ADDITIONAL_CLEAN_FILES "communication/webserver_files.h")
 
+execute_process(
+    COMMAND git describe --tags --always
+    WORKING_DIRECTORY ${COMPONENT_DIR}/..
+    OUTPUT_VARIABLE GIT_VERSION
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
 target_compile_options(${COMPONENT_TARGET}
     PRIVATE
         -fstack-reuse=all
@@ -62,4 +69,5 @@ target_compile_options(${COMPONENT_TARGET}
         -Wno-deprecated-declarations
         -Wno-missing-field-initializers
         -Wno-parentheses
+        -DVERSION=\"${GIT_VERSION}\"
 )

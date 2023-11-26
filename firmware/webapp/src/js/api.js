@@ -5,7 +5,6 @@
  * POST /api/v1/set
  * GET  /api/v1/leds
  * GET  /api/v1/tasks
- * GET  /api/v1/animations
  * GET  /api/v1/triggerOta (?url=)
  * GET  /api/v1/ota
  * GET  /api/v1/reboot
@@ -18,20 +17,23 @@ export class ClockApi {
     onConfigChange;
     onLedsChange;
     onTasksChange;
-    onAnimationsChange;
     onOtaStatusChange;
+    onOffline;
     fetchInterval;
 
     constructor(isDev) {
         this.isDev = isDev;
-        this.apiBase = isDev ? 'http://192.168.12.230/api/v1' : '/api/v1';
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const host = urlParams.get('host');
+
+        this.apiBase = this.isDev ? `http://${host ?? '192.168.12.230'}/api/v1` : '/api/v1';
 
         // state
         this.status = null;
         this.config = null;
         this.leds = null;
         this.tasks = null;
-        this.animations = null;
         this.otastatus = null;
 
         // interval
@@ -42,8 +44,8 @@ export class ClockApi {
         this.onConfigChange = null;
         this.onLedsChange = null;
         this.onTasksChange = null;
-        this.onAnimationsChange = null;
         this.onOtaStatusChange = null;
+        this.onOffline = null;
 
         this.fetching = false;
 
@@ -56,8 +58,8 @@ export class ClockApi {
             case 'onConfigChange':
             case 'onLedsChange':
             case 'onTasksChange':
-            case 'onAnimationsChange':
             case 'onOtaStatusChange':
+            case 'onOffline':
                 this[`${event}`] = callback;
                 break;
             default:
@@ -71,8 +73,8 @@ export class ClockApi {
             case 'onConfigChange':
             case 'onLedsChange':
             case 'onTasksChange':
-            case 'onAnimationsChange':
             case 'onOtaStatusChange':
+            case 'onOffline':
                 this[`${event}`] = null;
                 break;
             default:
@@ -98,12 +100,12 @@ export class ClockApi {
             await delay(ms);
             await this.fetchTasks();
             await delay(ms);
-            await this.fetchAnimations();
-            await delay(ms);
             await this.fetchOtaStatus();
         } catch (e) {
             this.fetching = false;
-            throw e;
+            if (this.onOffline)
+                this.onOffline();
+            console.error('fetch error', e);
         }
 
         this.fetching = false;
@@ -125,7 +127,10 @@ export class ClockApi {
     }
 
     async fetchStatus() {
-        const response = await fetch(`${this.apiBase}/status`);
+        const controller = new AbortController();
+        setTimeout(() => controller.abort(), 3000);
+
+        const response = await fetch(`${this.apiBase}/status`, { signal: controller.signal });
         this.status = await response.json();
         if (this.onStatusChange)
             this.onStatusChange(this.status);
@@ -133,7 +138,10 @@ export class ClockApi {
     }
 
     async fetchConfig() {
-        const response = await fetch(`${this.apiBase}/config`);
+        const controller = new AbortController();
+        setTimeout(() => controller.abort(), 3000);
+
+        const response = await fetch(`${this.apiBase}/config`, { signal: controller.signal });
         this.config = await response.json();
         if (this.onConfigChange)
             this.onConfigChange(this.config);
@@ -141,7 +149,10 @@ export class ClockApi {
     }
 
     async fetchLeds() {
-            const response = await fetch(`${this.apiBase}/leds`);
+        const controller = new AbortController();
+        setTimeout(() => controller.abort(), 3000);
+
+        const response = await fetch(`${this.apiBase}/leds`, { signal: controller.signal });
         this.leds = await response.json();
         if (this.onLedsChange)
             this.onLedsChange(this.leds);
@@ -149,23 +160,21 @@ export class ClockApi {
     }
 
     async fetchTasks() {
-            const response = await fetch(`${this.apiBase}/tasks`);
+        const controller = new AbortController();
+        setTimeout(() => controller.abort(), 3000);
+
+        const response = await fetch(`${this.apiBase}/tasks`, { signal: controller.signal });
         this.tasks = await response.json();
         if (this.onTasksChange)
             this.onTasksChange(this.tasks);
         return this.tasks;
     }
 
-    async fetchAnimations() {
-            const response = await fetch(`${this.apiBase}/animations`);
-        this.animations = await response.json();
-        if (this.onAnimationsChange)
-            this.onAnimationsChange(this.animations);
-        return this.animations;
-    }
-
     async fetchOtaStatus() {
-            const response = await fetch(`${this.apiBase}/ota`);
+        const controller = new AbortController();
+        setTimeout(() => controller.abort(), 3000);
+
+        const response = await fetch(`${this.apiBase}/ota`, { signal: controller.signal });
         this.otastatus = await response.json();
         if (this.onOtaStatusChange)
             this.onOtaStatusChange(this.otastatus);
@@ -173,6 +182,7 @@ export class ClockApi {
     }
 
     async setConfig(config) {
+        console.log('setConfig', config);
         const response = await fetch(`${this.apiBase}/set?${this.serializeQueryString(config)}`);
         return await response.json();
     }
@@ -187,8 +197,11 @@ export class ClockApi {
         return await response.json();
     }
 
+    getConfig(key) {
+        return this.config[key];
+    }
+
     serializeQueryString(obj) {
         return Object.keys(obj).map(key => `${encodeURIComponent(key)}=${encodeURIComponent(obj[key])}`).join('&');
     }
 }
-

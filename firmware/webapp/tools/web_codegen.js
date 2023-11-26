@@ -126,7 +126,7 @@ async function main() {
 
         const minified = skipMinify ?
             await fs.promises.readFile(srcFile) :
-            await minify(srcFile, {sourceMap: false, html: { removeScriptTypeAttributes: false, removeRedundantAttributes: false }});
+            await minify(srcFile, {sourceMap: false, html: { removeScriptTypeAttributes: false, removeRedundantAttributes: false }, js: { ecma: 2015, compress: { passes: 2 }, ie8: true }});
 
         // create gzip file
         const compressed = await gzip(minified); // compressed is a Buffer

@@ -13,13 +13,13 @@ class StaticColorAnimation : public LedAnimation
 
     constexpr bool rendersOnce() const override { return true; }
 
-private:
+    cpputils::ColorHelper getPrimaryColor() const { return cpputils::ColorHelper{0, 0, 0}; }
 
     void render_segment(SevenSegmentDigit::Segment segment, SevenSegmentDigit& sevenSegmentDigit, CRGB* leds, size_t leds_length) override;
 
     void render_dot(ClockDot& clockDot, CRGB* leds, size_t leds_length) override;
 
-    const char * getName() const override { return "StaticColor"; }
+    LedAnimationName getEnumValue() const override { return LedAnimationName::StaticColor; }
 };
 
 } // namespace animation

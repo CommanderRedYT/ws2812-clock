@@ -38,12 +38,32 @@ typename std::enable_if<
         !std::is_same_v<T, sntp_sync_mode_t> &&
         !std::is_same_v<T, espchrono::DayLightSavingMode> &&
         !typeutils::is_optional_v<T> &&
-        !std::is_same_v<T, cpputils::ColorHelper>
+        !std::is_same_v<T, cpputils::ColorHelper> &&
+        !std::is_same_v<T, SecondaryBrightnessMode> &&
+        !std::is_same_v<T, LedAnimationName>
         , FromJsonReturnType>::type
 toJson(const T& value, JsonDocument &doc)
 {
     ESP_LOGW("toJson", "toJson not implemented for type %s", t_to_str<T>::str);
     return std::unexpected(std::string("toJson not implemented for type ") + t_to_str<T>::str);
+}
+
+template<typename T>
+typename std::enable_if<
+        !is_duration_v<T> &&
+        (std::is_same_v<T, SecondaryBrightnessMode> ||
+         std::is_same_v<T, LedAnimationName>)
+        , FromJsonReturnType>::type
+toJson(const T& value, JsonDocument &doc)
+{
+    doc["value"] = toString(value);
+    JsonArray arr = doc.createNestedArray("values");
+
+    typesafeenum::iterateEnum<T>::iterate([&](T enum_value, const auto &string_value) {
+        arr.add(string_value);
+    });
+
+    return {};
 }
 
 template<typename T>

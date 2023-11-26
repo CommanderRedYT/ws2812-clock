@@ -80,7 +80,10 @@ const ConfigApiGetResult* getConfigAsJson(const char* lastKey)
             return true;
         }
 
-        doc[config.nvsName()] = currentValue;
+        JsonObject obj = doc.createNestedObject(config.nvsName());
+        obj["value"] = currentValue;
+        obj["type"] = typeutils::t_to_str<decltype(config.value())>::str;
+        obj["touched"] = config.touched();
 
         if (doc.overflowed())
         {

@@ -40,29 +40,75 @@ bool calculateLedVisibility()
     return false;
 }
 
+bool isInSecondaryBrightnessTimeRange()
+{
+    const auto now = espchrono::local_clock::now();
+    const auto dt = toDateTime(now);
+    const auto secondaryBrightnessMode = configs.secondaryBrightnessMode.value();
+
+    if (secondaryBrightnessMode == SecondaryBrightnessMode::Off)
+    {
+        ESP_LOGD(TAG, "secondaryBrightnessMode is Off");
+        return false;
+    }
+
+    if (secondaryBrightnessMode == SecondaryBrightnessMode::UseRange)
+    {
+        const auto secondaryBrightnessStart = configs.secondaryBrightnessTimeRange.start.value(); // seconds32
+        const auto secondaryBrightnessEnd = configs.secondaryBrightnessTimeRange.end.value();    // seconds32
+
+        const auto startHour = secondaryBrightnessStart / 3600;
+        const auto startMinute = (secondaryBrightnessStart % 3600) / 60;
+        const auto endHour = secondaryBrightnessEnd / 3600;
+        const auto endMinute = (secondaryBrightnessEnd % 3600) / 60;
+
+        if (startHour > endHour || (startHour == endHour && startMinute > endMinute))
+        {
+            // over midnight
+            if ((dt.hour >= startHour.count() || dt.hour < endHour.count()) ||
+                (dt.hour == startHour.count() && dt.minute >= startMinute.count()) ||
+                (dt.hour == endHour.count() && dt.minute < endMinute.count()))
+            {
+                return true;
+            }
+
+            return false;
+        }
+        else
+        {
+            // same day
+            if ((dt.hour >= startHour.count() && dt.hour < endHour.count()) ||
+                (dt.hour == startHour.count() && dt.minute >= startMinute.count()) ||
+                (dt.hour == endHour.count() && dt.minute < endMinute.count()))
+            {
+                return true;
+            }
+
+            return false;
+        }
+    }
+
+    ESP_LOGD(TAG, "secondaryBrightnessMode is UseSunriseSunset");
+
+    return false;
+}
+
 } // namespace
 
 void LedManager::handleVoltageAndCurrent()
 {
     const auto now = espchrono::millis_clock::now();
+    const auto brightness = configs.ledBrightness.value();
+    const auto secondaryBrightness = configs.ledSecondaryBrightness.value();
+    const auto inSecondaryBrightnessTimeRange = isInSecondaryBrightnessTimeRange();
 
+    ESP_LOGD(TAG, "brightness: %d, secondaryBrightness: %d, inSecondaryBrightnessTimeRange: %d", brightness, secondaryBrightness, inSecondaryBrightnessTimeRange);
+
+    uint8_t brightnessTarget = !m_visible ? 0 : inSecondaryBrightnessTimeRange ? secondaryBrightness : brightness;
+
+    constexpr float fadeFactor = 0.9f;
+    m_brightness = m_brightness * fadeFactor + brightnessTarget * (1.0f - fadeFactor);
     FastLED.setBrightness(m_brightness);
-
-    uint8_t brightnessTarget = m_visible ? configs.ledBrightness.value() : 0;
-
-    if (espchrono::ago(m_brightnessLastUpdate) > 25ms)
-    {
-        if (m_brightness < brightnessTarget)
-        {
-            m_brightness++;
-        }
-        else if (m_brightness > brightnessTarget)
-        {
-            m_brightness--;
-        }
-
-        m_brightnessLastUpdate = now;
-    }
 
     if (/*barrel_jack_connected*/false)
     {
@@ -141,7 +187,7 @@ void LedManager::render()
     upper.on(dotsOn);
     lower.on(dotsOn);
 
-    if (const auto res = animation::updateAnimation(configs.ledAnimation.value().c_str(), leds); !res)
+    if (const auto res = animation::updateAnimation(configs.ledAnimation.value(), leds); !res)
     {
         ESP_LOGE(TAG, "Failed to update animation: %.*s\n", res.error().size(), res.error().data());
     }
@@ -165,11 +211,9 @@ void LedManager::render()
             animation->render_dot(lower, leds.begin(), leds.size());
         }
     }
-    else
-    {
-        upper.render();
-        lower.render();
-    }
+
+    upper.render();
+    lower.render();
 
     if (!configs.noClockDigits.value())
     {

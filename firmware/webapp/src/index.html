@@ -22,24 +22,37 @@
     <script src="/js/api.js" defer type="module"></script>
 </head>
 <body>
-    <div>
+<div>
+    <div class="container mb-3">
         <h1>
-            servus
+            Debug
         </h1>
         <pre id="status"></pre>
-        <pre id="config"></pre>
-        <pre id="animations"></pre>
         <pre id="ota"></pre>
-        <form id="setKey">
-            <!--<input type="text" name="key" id="key" placeholder="key">-->
-            <select name="key" id="key"></select>
-            <input type="text" name="value" id="value" placeholder="value">
-            <input type="submit" type="button" value="set" id="set">
-        </form>
+    </div>
+    <div class="container mb-3">
+        <h2>Over The Air Update</h2>
         <form id="triggerOtaForm" action="/api/v1/triggerOta" method="get">
             <input type="url" name="url" id="url" placeholder="url">
             <input type="submit" type="button" value="trigger OTA" id="triggerOta">
         </form>
     </div>
+    <div class="container-fluid mb-3">
+        <h2 class="mb-1">Config Explorer (Debug)</h2>
+        <p class="mb-3">This is a debug view of the config. Only use this if you know what you are doing. <b>(No, you do not know what you are doing, so do not even think about it!)</b></p>
+        <table id="configExplorer" class="table table-striped table-hover">
+            <thead>
+            <tr>
+                <th scope="col">Key</th>
+                <th scope="col">Value</th>
+                <th scope="col">Datatype</th>
+                <th scope="col">Set</th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
 </body>
 </html>

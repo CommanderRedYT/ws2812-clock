@@ -11,6 +11,7 @@ namespace webserver {
 template<typename T>
 std::expected<void, std::string> saveSetting(ConfigWrapper<T> &config, const std::string_view newValue)
 {
+    ESP_LOGI("ConfigApiHelper", "%s=%s", config.nvsName(), newValue.data());
     if (auto parsed = apihelpers::fromJson(config, newValue))
     {
         return {};
