@@ -281,7 +281,7 @@ void publishHomeassistantDiscovery()
         doc.clear();
         doc["name"] = "BME280 Pressure";
         doc["state_topic"] = fmt::format("{}/{}/status/bme280/pressure", configs.mqttTopic.value(), configs.hostname.value());
-        doc["unit_of_measurement"] = "hPa";
+        doc["unit_of_measurement"] = "Pa";
         doc["value_template"] = "{{ value_json }}";
         doc["state_class"] = "measurement";
         doc["device_class"] = "atmospheric_pressure";
