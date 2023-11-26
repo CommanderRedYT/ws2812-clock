@@ -27,6 +27,11 @@ LedArray leds;
 
 bool calculateLedVisibility()
 {
+    if (!configs.ledAnimationEnabled.value())
+    {
+        return false;
+    }
+
     if (configs.showUnsyncedTime.value())
     {
         return true;

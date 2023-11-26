@@ -123,6 +123,7 @@ std::string format_error(esp_mqtt_error_codes_t* error_handle)
 
 [[noreturn]] void mqtt_handle_receive(void*)
 {
+    static StaticJsonDocument<1024> doc;
     auto helper = cpputils::makeCleanupHelper([](){ vTaskDelete(nullptr); });
 
     while (true)
@@ -151,56 +152,62 @@ std::string format_error(esp_mqtt_error_codes_t* error_handle)
 
                 const std::string key = topic.substr(topic.find_last_of('/') + 1);
 
-                if (key == "brightness")
+                if (key == "light")
                 {
-                    ESP_LOGI(TAG, "mqtt_receive_handle: brightness=%s", value.c_str());
+                    doc.clear();
 
-                    if (value == "ON")
+                    if (deserializeJson(doc, value) != DeserializationError::Ok)
                     {
-                        configs.write_config(configs.ledBrightness, 255);
+                        ESP_LOGE(TAG, "mqtt_receive_handle: failed to deserialize json");
+                        continue;
                     }
-                    else if (value == "OFF")
+
+                    // {"state": "ON", "brightness": 255, "effect": "rainbow"}
+                    if (doc.containsKey("effect"))
                     {
-                        configs.write_config(configs.ledBrightness, 0);
-                    }
-                    else
-                    {
-                        if (auto res = cpputils::fromString<uint8_t>(value); res)
+                        const auto effect = doc["effect"].as<std::string>();
+                        if (const auto parsed = parseLedAnimationName(effect); parsed)
                         {
-                            ESP_LOGI(TAG, "mqtt_receive_handle: brightness=%d", *res);
-                            configs.write_config(configs.ledBrightness, *res);
+                            configs.write_config(configs.ledAnimation, *parsed);
                         }
                         else
                         {
-                            ESP_LOGE(TAG, "mqtt_receive_handle: invalid brightness value %s", value.c_str());
+                            ESP_LOGE(TAG, "mqtt_receive_handle: unknown effect %s", effect.c_str());
                         }
                     }
-                }
-                else if (key == "effect")
-                {
-                    ESP_LOGI(TAG, "mqtt_receive_handle: animation=%s", value.c_str());
 
-                    if (const auto res = parseLedAnimationName(value); res)
+                    if (doc.containsKey("state"))
                     {
-                        configs.write_config(configs.ledAnimation, *res);
+                        const auto state = doc["state"].as<std::string>();
+                        configs.write_config(configs.ledAnimationEnabled, state == "ON");
                     }
-                    else
-                    {
-                        ESP_LOGE(TAG, "mqtt_receive_handle: invalid animation value %s", value.c_str());
-                    }
-                }
-                else if (key == "rgb")
-                {
-                    ESP_LOGI(TAG, "mqtt_receive_handle: rgb=%s", value.c_str());
 
-                    if (cpputils::ColorHelper colorHelper; std::sscanf(value.data(), "%hhu,%hhu,%hhu", &colorHelper.r, &colorHelper.g, &colorHelper.b) == 3)
+                    if (doc.containsKey("brightness"))
                     {
-                        configs.write_config(configs.primaryColor, colorHelper);
+                        if (const auto brightness = doc["brightness"].as<int>(); brightness >= 0 && brightness <= 255)
+                        {
+                            configs.write_config(configs.ledBrightness, brightness);
+                        }
+                        else
+                        {
+                            ESP_LOGE(TAG, "mqtt_receive_handle: brightness out of range");
+                        }
                     }
-                    else
+
+                    if (doc.containsKey("color"))
                     {
-                        ESP_LOGE(TAG, "mqtt_receive_handle: invalid rgb value %s", value.c_str());
+                        auto color = doc["color"].as<JsonObject>();
+                        if (color.containsKey("r") && color.containsKey("g") && color.containsKey("b"))
+                        {
+                            const auto r = color["r"].as<uint8_t>();
+                            const auto g = color["g"].as<uint8_t>();
+                            const auto b = color["b"].as<uint8_t>();
+
+                            configs.write_config(configs.primaryColor, cpputils::ColorHelper{r, g, b});
+                        }
                     }
+
+                    lastMqttPublish = std::nullopt;
                 }
                 else
                 {
@@ -255,6 +262,9 @@ void publishHomeassistantDiscovery()
         doc.clear();
         doc["name"] = "BME280 Temperature";
         doc["state_topic"] = fmt::format("{}/{}/status/bme280/temp", configs.mqttTopic.value(), configs.hostname.value());
+        doc["availability_topic"] = fmt::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
+        doc["payload_available"] = "true";
+        doc["payload_not_available"] = "false";
         doc["unit_of_measurement"] = "°C";
         doc["value_template"] = "{{ value_json }}";
         doc["state_class"] = "measurement";
@@ -283,6 +293,9 @@ void publishHomeassistantDiscovery()
         doc.clear();
         doc["name"] = "BME280 Pressure";
         doc["state_topic"] = fmt::format("{}/{}/status/bme280/pressure", configs.mqttTopic.value(), configs.hostname.value());
+        doc["availability_topic"] = fmt::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
+        doc["payload_available"] = "true";
+        doc["payload_not_available"] = "false";
         doc["unit_of_measurement"] = "Pa";
         doc["value_template"] = "{{ value_json }}";
         doc["state_class"] = "measurement";
@@ -311,6 +324,9 @@ void publishHomeassistantDiscovery()
         doc.clear();
         doc["name"] = "BME280 Humidity";
         doc["state_topic"] = fmt::format("{}/{}/status/bme280/humidity", configs.mqttTopic.value(), configs.hostname.value());
+        doc["availability_topic"] = fmt::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
+        doc["payload_available"] = "true";
+        doc["payload_not_available"] = "false";
         doc["unit_of_measurement"] = "%";
         doc["value_template"] = "{{ value_json }}";
         doc["state_class"] = "measurement";
@@ -345,6 +361,9 @@ void publishHomeassistantDiscovery()
         doc.clear();
         doc["name"] = "WiFi Signal Strength";
         doc["state_topic"] = fmt::format("{}/{}/status/sta/rssi", configs.mqttTopic.value(), configs.hostname.value());
+        doc["availability_topic"] = fmt::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
+        doc["payload_available"] = "true";
+        doc["payload_not_available"] = "false";
         doc["unit_of_measurement"] = "dBm";
         doc["value_template"] = "{{ value_json }}";
         doc["state_class"] = "measurement";
@@ -373,6 +392,9 @@ void publishHomeassistantDiscovery()
         doc.clear();
         doc["name"] = "WiFi SSID";
         doc["state_topic"] = fmt::format("{}/{}/status/sta/ssid", configs.mqttTopic.value(), configs.hostname.value());
+        doc["availability_topic"] = fmt::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
+        doc["payload_available"] = "true";
+        doc["payload_not_available"] = "false";
         doc["value_template"] = "{{ value_json }}";
         doc["device"]["identifiers"][0] = configs.hostname.value();
         doc["device"]["name"] = configs.name.value();
@@ -398,6 +420,9 @@ void publishHomeassistantDiscovery()
         doc.clear();
         doc["name"] = "WiFi BSSID";
         doc["state_topic"] = fmt::format("{}/{}/status/sta/bssid", configs.mqttTopic.value(), configs.hostname.value());
+        doc["availability_topic"] = fmt::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
+        doc["payload_available"] = "true";
+        doc["payload_not_available"] = "false";
         doc["value_template"] = "{{ value_json }}";
         doc["device"]["identifiers"][0] = configs.hostname.value();
         doc["device"]["name"] = configs.name.value();
@@ -423,6 +448,9 @@ void publishHomeassistantDiscovery()
         doc.clear();
         doc["name"] = "WiFi IP";
         doc["state_topic"] = fmt::format("{}/{}/status/sta/ip", configs.mqttTopic.value(), configs.hostname.value());
+        doc["availability_topic"] = fmt::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
+        doc["payload_available"] = "true";
+        doc["payload_not_available"] = "false";
         doc["value_template"] = "{{ value_json }}";
         doc["device"]["identifiers"][0] = configs.hostname.value();
         doc["device"]["name"] = configs.name.value();
@@ -450,6 +478,9 @@ void publishHomeassistantDiscovery()
         doc.clear();
         doc["name"] = "Uptime";
         doc["state_topic"] = fmt::format("{}/{}/status/time/millis", configs.mqttTopic.value(), configs.hostname.value());
+        doc["availability_topic"] = fmt::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
+        doc["payload_available"] = "true";
+        doc["payload_not_available"] = "false";
         doc["unit_of_measurement"] = "ms";
         doc["value_template"] = "{{ value_json }}";
         doc["state_class"] = "measurement";
@@ -476,15 +507,15 @@ void publishHomeassistantDiscovery()
 
     {
         doc.clear();
-        doc["name"] = "Brightness";
-        doc["command_topic"] = fmt::format("{}/{}/set/brightness", configs.mqttTopic.value(), configs.hostname.value());
-        doc["brightness_command_topic"] = fmt::format("{}/{}/set/brightness", configs.mqttTopic.value(), configs.hostname.value());
-        doc["effect_command_topic"] = fmt::format("{}/{}/set/effect", configs.mqttTopic.value(), configs.hostname.value());
-        doc["rgb_command_topic"] = fmt::format("{}/{}/set/rgb", configs.mqttTopic.value(), configs.hostname.value());
-        doc["rgb_state_topic"] = fmt::format("{}/{}/status/led/homeassistant", configs.mqttTopic.value(), configs.hostname.value());
+        doc["name"] = "Light";
+        doc["command_topic"] = fmt::format("{}/{}/set/light", configs.mqttTopic.value(), configs.hostname.value());
         doc["state_topic"] = fmt::format("{}/{}/status/led/homeassistant", configs.mqttTopic.value(), configs.hostname.value());
+        doc["availability_topic"] = fmt::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
+        doc["payload_available"] = "true";
+        doc["payload_not_available"] = "false";
         doc["brightness"] = true;
         doc["effect"] = true;
+        doc["rgb"] = true;
 
         {
             JsonArray effectList = doc.createNestedArray("effect_list");
@@ -493,11 +524,8 @@ void publishHomeassistantDiscovery()
             });
         }
 
-        doc["on_command_type"] = "brightness";
-        doc["state_template"] = "{{ value_json.state }}";
-        doc["brightness_template"] = "{{ value_json.brightness }}";
-        doc["effect_template"] = "{{ value_json.effect }}";
-        doc["rgb_value_template"] = "{{ value_json.r }},{{ value_json.g }},{{ value_json.b }}";
+        doc["schema"] = "json";
+
         doc["device"]["identifiers"][0] = configs.hostname.value();
         doc["device"]["name"] = configs.name.value();
         doc["device"]["manufacturer"] = "ws2812-clock";
@@ -507,14 +535,14 @@ void publishHomeassistantDiscovery()
         {
             doc["device"]["configuration_url"] = *configurationUrl;
         }
-        doc["unique_id"] = fmt::format("{}_brightness", configs.hostname.value());
+        doc["unique_id"] = fmt::format("{}_light", configs.hostname.value());
         doc["expire_after"] = expireAfter;
 
         std::string payload;
         serializeJson(doc, payload);
 
         publishQueue.push(std::make_tuple(
-                fmt::format("{}light/{}/brightness/config", configs.hassMqttTopic.value(), configs.hostname.value()),
+                fmt::format("{}light/{}/light/config", configs.hassMqttTopic.value(), configs.hostname.value()),
                 payload));
     }
 
