@@ -10,6 +10,9 @@ on:
       - .github/**
       - firmware/**
 
+permissions:
+  contents: write
+
 jobs:
   checkout:
     runs-on: ubuntu-latest
