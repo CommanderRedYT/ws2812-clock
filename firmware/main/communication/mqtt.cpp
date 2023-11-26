@@ -262,6 +262,9 @@ void publishHomeassistantDiscovery()
         doc.clear();
         doc["name"] = "BME280 Temperature";
         doc["state_topic"] = fmt::format("{}/{}/status/bme280/temp", configs.mqttTopic.value(), configs.hostname.value());
+        doc["availability_topic"] = fmt::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
+        doc["payload_available"] = "true";
+        doc["payload_not_available"] = "false";
         doc["unit_of_measurement"] = "°C";
         doc["value_template"] = "{{ value_json }}";
         doc["state_class"] = "measurement";
@@ -290,6 +293,9 @@ void publishHomeassistantDiscovery()
         doc.clear();
         doc["name"] = "BME280 Pressure";
         doc["state_topic"] = fmt::format("{}/{}/status/bme280/pressure", configs.mqttTopic.value(), configs.hostname.value());
+        doc["availability_topic"] = fmt::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
+        doc["payload_available"] = "true";
+        doc["payload_not_available"] = "false";
         doc["unit_of_measurement"] = "Pa";
         doc["value_template"] = "{{ value_json }}";
         doc["state_class"] = "measurement";
@@ -318,6 +324,9 @@ void publishHomeassistantDiscovery()
         doc.clear();
         doc["name"] = "BME280 Humidity";
         doc["state_topic"] = fmt::format("{}/{}/status/bme280/humidity", configs.mqttTopic.value(), configs.hostname.value());
+        doc["availability_topic"] = fmt::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
+        doc["payload_available"] = "true";
+        doc["payload_not_available"] = "false";
         doc["unit_of_measurement"] = "%";
         doc["value_template"] = "{{ value_json }}";
         doc["state_class"] = "measurement";
@@ -352,6 +361,9 @@ void publishHomeassistantDiscovery()
         doc.clear();
         doc["name"] = "WiFi Signal Strength";
         doc["state_topic"] = fmt::format("{}/{}/status/sta/rssi", configs.mqttTopic.value(), configs.hostname.value());
+        doc["availability_topic"] = fmt::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
+        doc["payload_available"] = "true";
+        doc["payload_not_available"] = "false";
         doc["unit_of_measurement"] = "dBm";
         doc["value_template"] = "{{ value_json }}";
         doc["state_class"] = "measurement";
@@ -380,6 +392,9 @@ void publishHomeassistantDiscovery()
         doc.clear();
         doc["name"] = "WiFi SSID";
         doc["state_topic"] = fmt::format("{}/{}/status/sta/ssid", configs.mqttTopic.value(), configs.hostname.value());
+        doc["availability_topic"] = fmt::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
+        doc["payload_available"] = "true";
+        doc["payload_not_available"] = "false";
         doc["value_template"] = "{{ value_json }}";
         doc["device"]["identifiers"][0] = configs.hostname.value();
         doc["device"]["name"] = configs.name.value();
@@ -405,6 +420,9 @@ void publishHomeassistantDiscovery()
         doc.clear();
         doc["name"] = "WiFi BSSID";
         doc["state_topic"] = fmt::format("{}/{}/status/sta/bssid", configs.mqttTopic.value(), configs.hostname.value());
+        doc["availability_topic"] = fmt::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
+        doc["payload_available"] = "true";
+        doc["payload_not_available"] = "false";
         doc["value_template"] = "{{ value_json }}";
         doc["device"]["identifiers"][0] = configs.hostname.value();
         doc["device"]["name"] = configs.name.value();
@@ -430,6 +448,9 @@ void publishHomeassistantDiscovery()
         doc.clear();
         doc["name"] = "WiFi IP";
         doc["state_topic"] = fmt::format("{}/{}/status/sta/ip", configs.mqttTopic.value(), configs.hostname.value());
+        doc["availability_topic"] = fmt::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
+        doc["payload_available"] = "true";
+        doc["payload_not_available"] = "false";
         doc["value_template"] = "{{ value_json }}";
         doc["device"]["identifiers"][0] = configs.hostname.value();
         doc["device"]["name"] = configs.name.value();
@@ -457,6 +478,9 @@ void publishHomeassistantDiscovery()
         doc.clear();
         doc["name"] = "Uptime";
         doc["state_topic"] = fmt::format("{}/{}/status/time/millis", configs.mqttTopic.value(), configs.hostname.value());
+        doc["availability_topic"] = fmt::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
+        doc["payload_available"] = "true";
+        doc["payload_not_available"] = "false";
         doc["unit_of_measurement"] = "ms";
         doc["value_template"] = "{{ value_json }}";
         doc["state_class"] = "measurement";
@@ -486,6 +510,9 @@ void publishHomeassistantDiscovery()
         doc["name"] = "Light";
         doc["command_topic"] = fmt::format("{}/{}/set/light", configs.mqttTopic.value(), configs.hostname.value());
         doc["state_topic"] = fmt::format("{}/{}/status/led/homeassistant", configs.mqttTopic.value(), configs.hostname.value());
+        doc["availability_topic"] = fmt::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
+        doc["payload_available"] = "true";
+        doc["payload_not_available"] = "false";
         doc["brightness"] = true;
         doc["effect"] = true;
         doc["rgb"] = true;
