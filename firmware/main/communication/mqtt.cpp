@@ -39,7 +39,7 @@ enum class MqttState
 } mqttState;
 
 std::string lastMqttUrl;
-espchrono::millis_clock::time_point lastMqttPublish;
+std::optional<espchrono::millis_clock::time_point> lastMqttPublish;
 bool mqttHassPublished;
 
 } // namespace
@@ -244,7 +244,9 @@ void publishHomeassistantDiscovery()
 
         return std::nullopt;
     }();
-    // hard code for the bme
+
+    const long long expireAfter = configs.mqttPublishInterval.value() / 1s + 5;
+
 #ifdef HARDWARE_USE_BME280
     // {mqttTopic}/{hostname}/status/bme280/temp: 25 (°C)
     // {mqttTopic}/{hostname}/status/bme280/pressure (hPa)
@@ -267,7 +269,7 @@ void publishHomeassistantDiscovery()
             doc["device"]["configuration_url"] = *configurationUrl;
         }
         doc["unique_id"] = fmt::format("{}_bme280_temp", configs.hostname.value());
-        doc["expire_after"] = 10;
+        doc["expire_after"] = expireAfter;
 
         std::string payload;
         serializeJson(doc, payload);
@@ -295,7 +297,7 @@ void publishHomeassistantDiscovery()
             doc["device"]["configuration_url"] = *configurationUrl;
         }
         doc["unique_id"] = fmt::format("{}_bme280_pressure", configs.hostname.value());
-        doc["expire_after"] = 10;
+        doc["expire_after"] = expireAfter;
 
         std::string payload;
         serializeJson(doc, payload);
@@ -323,7 +325,7 @@ void publishHomeassistantDiscovery()
             doc["device"]["configuration_url"] = *configurationUrl;
         }
         doc["unique_id"] = fmt::format("{}_bme280_humidity", configs.hostname.value());
-        doc["expire_after"] = 10;
+        doc["expire_after"] = expireAfter;
 
         std::string payload;
         serializeJson(doc, payload);
@@ -357,7 +359,7 @@ void publishHomeassistantDiscovery()
             doc["device"]["configuration_url"] = *configurationUrl;
         }
         doc["unique_id"] = fmt::format("{}_wifi_rssi", configs.hostname.value());
-        doc["expire_after"] = 10;
+        doc["expire_after"] = expireAfter;
 
         std::string payload;
         serializeJson(doc, payload);
@@ -382,7 +384,7 @@ void publishHomeassistantDiscovery()
             doc["device"]["configuration_url"] = *configurationUrl;
         }
         doc["unique_id"] = fmt::format("{}_wifi_ssid", configs.hostname.value());
-        doc["expire_after"] = 10;
+        doc["expire_after"] = expireAfter;
 
         std::string payload;
         serializeJson(doc, payload);
@@ -407,7 +409,7 @@ void publishHomeassistantDiscovery()
             doc["device"]["configuration_url"] = *configurationUrl;
         }
         doc["unique_id"] = fmt::format("{}_wifi_bssid", configs.hostname.value());
-        doc["expire_after"] = 10;
+        doc["expire_after"] = expireAfter;
 
         std::string payload;
         serializeJson(doc, payload);
@@ -432,7 +434,7 @@ void publishHomeassistantDiscovery()
             doc["device"]["configuration_url"] = *configurationUrl;
         }
         doc["unique_id"] = fmt::format("{}_wifi_ip", configs.hostname.value());
-        doc["expire_after"] = 10;
+        doc["expire_after"] = expireAfter;
 
         std::string payload;
         serializeJson(doc, payload);
@@ -462,7 +464,7 @@ void publishHomeassistantDiscovery()
             doc["device"]["configuration_url"] = *configurationUrl;
         }
         doc["unique_id"] = fmt::format("{}_uptime", configs.hostname.value());
-        doc["expire_after"] = 10;
+        doc["expire_after"] = expireAfter;
 
         std::string payload;
         serializeJson(doc, payload);
@@ -506,7 +508,7 @@ void publishHomeassistantDiscovery()
             doc["device"]["configuration_url"] = *configurationUrl;
         }
         doc["unique_id"] = fmt::format("{}_brightness", configs.hostname.value());
-        doc["expire_after"] = 10;
+        doc["expire_after"] = expireAfter;
 
         std::string payload;
         serializeJson(doc, payload);
@@ -545,6 +547,7 @@ void event_handler(void*, esp_event_base_t event_base, int32_t event_id_arg, voi
         mqttState = MqttState::Connected;
 
         client.subscribe(fmt::format("{}/{}/set/#", configs.mqttTopic.value(), configs.hostname.value()).c_str(), 0);
+        client.publish(fmt::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value()).c_str(), "true", 0, 1);
 
         break;
     case MQTT_EVENT_DISCONNECTED:
@@ -585,6 +588,10 @@ void init(std::string_view url)
 {
     espcpputils::RecursiveLockHelper guard{global::global_lock->handle};
 
+    static const std::string lastWillTopic = fmt::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
+    static constexpr const char * const lastWillMessage = "false";
+    static constexpr const size_t lastWillMessageLen = std::char_traits<char>::length(lastWillMessage);
+
     client = {};
     lastMqttUrl = {};
     mqttState = MqttState::NotStarted;
@@ -612,11 +619,19 @@ void init(std::string_view url)
     }
 
     esp_mqtt_client_config_t mqtt_cfg{
-        .broker = {
-            .address = {
-                .uri = url.data(),
+            .broker = {
+                    .address = {
+                            .uri = url.data(),
+                    },
             },
-        },
+            .session = {
+                    .last_will = {
+                            .topic = lastWillTopic.c_str(),
+                            .msg = lastWillMessage,
+                            .msg_len = lastWillMessageLen,
+                            .retain = 1,
+                    }
+            },
     };
 
     client = espcpputils::mqtt_client{&mqtt_cfg};
@@ -743,7 +758,7 @@ void update()
         }
     }
 
-    if (mqttState == MqttState::Connected && espchrono::ago(lastMqttPublish) > 1s)
+    if (mqttState == MqttState::Connected && (!lastMqttPublish || espchrono::ago(*lastMqttPublish) > configs.mqttPublishInterval.value()))
     {
         publishStatus();
     }
