@@ -13,7 +13,7 @@ jobs:
         id: cache-repository
         with:
           path: repository
-          key: ${{ runner.os }}-repository
+          key: ${{ runner.os }}-repository-${{ github.sha }}
 
       - name: Checkout repository
         uses: actions/checkout@v3
