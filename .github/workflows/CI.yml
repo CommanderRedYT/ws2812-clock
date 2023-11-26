@@ -92,20 +92,13 @@ jobs:
           echo "Cache .espressif did not hit? Did the prepare step run successfully?"
           exit 1
 
-      - name: Setup ccache
-        uses: 0xFEEDC0DE64/setup_ccache@main
-        with:
-          key: ${{ runner.os }}-ccache-${{ matrix.node }}
-
       - name: Build firmware
         run: |
           cd repository/firmware
-          export CCACHE_MAXSIZE=1024M CCACHE_BASEDIR="$(pwd)"
           ./esp-idf/install.sh
           . export.sh
           ./switchconf.sh ${{ matrix.node }}
-          idf.py --ccache build
-          ccache -s
+          idf.py build
 
       - name: Set outputs
         id: vars
