@@ -52,3 +52,6 @@
 [submodule "firmware/components/espasyncota"]
 	path = firmware/components/espasyncota
 	url = git@github.com:CommanderRedYT/espasyncota.git
+[submodule "firmware/components/espasyncudplistener"]
+	path = firmware/components/espasyncudplistener
+	url = git@github.com:CommanderRedYT/espasyncudplistener.git
