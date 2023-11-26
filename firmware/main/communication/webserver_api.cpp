@@ -65,10 +65,6 @@ esp_err_t cors_handler(httpd_req_t* req)
         ESP_LOGE(TAG, "Failed to set Access-Control-Allow-Origin header: %s", esp_err_to_name(res));
         return res;
     }
-    else
-    {
-        ESP_LOGI(TAG, "Set Access-Control-Allow-Origin header to http://localhost:3000");
-    }
 
     if (const auto res = httpd_resp_set_hdr(req, "Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
             res != ESP_OK)
@@ -76,19 +72,11 @@ esp_err_t cors_handler(httpd_req_t* req)
         ESP_LOGE(TAG, "Failed to set Access-Control-Allow-Methods header: %s", esp_err_to_name(res));
         return res;
     }
-    else
-    {
-        ESP_LOGI(TAG, "Set Access-Control-Allow-Methods header to GET, POST, PUT, DELETE, OPTIONS");
-    }
 
     if (const auto res = httpd_resp_set_hdr(req, "Access-Control-Allow-Headers", "Content-Type"); res != ESP_OK)
     {
         ESP_LOGE(TAG, "Failed to set Access-Control-Allow-Headers header: %s", esp_err_to_name(res));
         return res;
-    }
-    else
-    {
-        ESP_LOGI(TAG, "Set Access-Control-Allow-Headers header to Content-Type");
     }
 
     return ESP_OK;
@@ -161,7 +149,8 @@ esp_err_t api_set_via_get_handler(httpd_req_t* req)
 {
     ESP_LOGI(TAG, "GET /api/set");
 
-    espcpputils::RecursiveLockHelper lockHelper{global::global_lock->handle};
+    espcpputils::RecursiveLockHelper globalLockHelper{global::global_lock->handle};
+    espcpputils::RecursiveLockHelper ledLockHelper{ledmanager::led_lock->handle};
 
     if (const auto res = cors_handler(req); res != ESP_OK)
         return res;
@@ -214,7 +203,8 @@ esp_err_t api_set_via_post_handler(httpd_req_t* req)
 {
     ESP_LOGI(TAG, "POST /api/set");
 
-    espcpputils::RecursiveLockHelper lockHelper{global::global_lock->handle};
+    espcpputils::RecursiveLockHelper globalLockHelper{global::global_lock->handle};
+    espcpputils::RecursiveLockHelper ledLockHelper{ledmanager::led_lock->handle};
 
     if (const auto res = cors_handler(req); res != ESP_OK)
         return res;
@@ -430,54 +420,6 @@ esp_err_t api_get_tasks_handler(httpd_req_t* req)
     return ESP_OK;
 }
 
-esp_err_t api_get_animations_handler(httpd_req_t* req)
-{
-    ESP_LOGI(TAG, "GET /api/animations");
-
-    espcpputils::RecursiveLockHelper lockHelper{global::global_lock->handle};
-
-    if (const auto res = cors_handler(req); res != ESP_OK)
-        return res;
-
-    auto guard = getApiJson();
-    auto& doc = *guard;
-
-    doc.clear();
-
-    doc["success"] = true;
-
-    doc.set(JsonArray{}); // create empty array
-
-    for (auto& animation : animation::animations)
-    {
-        auto animationObj = doc.createNestedObject();
-
-        animationObj["name"] = animation->getName();
-    }
-
-    if (doc.overflowed())
-    {
-        if (const auto res = esphttpdutils::webserver_resp_send(req, esphttpdutils::ResponseStatus::InternalServerError, "application/json", R"({"success":false,"message":"Failed to serialize JSON"})"); res != ESP_OK)
-        {
-            ESP_LOGE(TAG, "Failed to send response: %s", esp_err_to_name(res));
-            return res;
-        }
-        return ESP_FAIL;
-    }
-
-    std::string json;
-
-    serializeJson(doc, json);
-
-    if (const auto res = esphttpdutils::webserver_resp_send(req, esphttpdutils::ResponseStatus::Ok, "application/json", json); res != ESP_OK)
-    {
-        ESP_LOGE(TAG, "Failed to send response: %s", esp_err_to_name(res));
-        return res;
-    }
-
-    return ESP_OK;
-}
-
 esp_err_t api_get_ota_status_handler(httpd_req_t* req)
 {
     ESP_LOGI(TAG, "GET /api/ota/status");
@@ -663,7 +605,6 @@ auto get_handlers()
         httpd_uri_t{ .uri = "/api/v1/set",        .method = HTTP_POST, .handler = api_set_via_post_handler,   .user_ctx = nullptr },
         httpd_uri_t{ .uri = "/api/v1/leds",       .method = HTTP_GET,  .handler = api_get_leds_handler,       .user_ctx = nullptr },
         httpd_uri_t{ .uri = "/api/v1/tasks",      .method = HTTP_GET,  .handler = api_get_tasks_handler,      .user_ctx = nullptr },
-        httpd_uri_t{ .uri = "/api/v1/animations", .method = HTTP_GET,  .handler = api_get_animations_handler, .user_ctx = nullptr },
         httpd_uri_t{ .uri = "/api/v1/ota",        .method = HTTP_GET,  .handler = api_get_ota_status_handler, .user_ctx = nullptr },
         httpd_uri_t{ .uri = "/api/v1/triggerOta", .method = HTTP_GET,  .handler = api_trigger_ota_handler,    .user_ctx = nullptr },
         httpd_uri_t{ .uri = "/api/v1/reboot",     .method = HTTP_GET,  .handler = api_trigger_reboot_handler, .user_ctx = nullptr }

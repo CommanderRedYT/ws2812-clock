@@ -57,9 +57,9 @@ extern "C" [[noreturn]] void app_main()
         ESP_LOGI(TAG, "config_init_settings() succeeded");
 
     configs.callForEveryConfig([&](auto& config) {
-        if (strlen(config.nvsName()) > 16)
+        if (strlen(config.nvsName()) > 15)
         {
-            ESP_LOGW(TAG, "config key '%s' is longer than 16 characters", config.nvsName());
+            ESP_LOGW(TAG, "config key '%s' is longer than 15 characters", config.nvsName());
             while (true)
                 vTaskDelay(1000);
         }

@@ -345,7 +345,7 @@ void handle_start()
 
 void handle_stop()
 {
-    if (mqttState == MqttState::NotStarted)
+    if (mqttState < MqttState::Started)
         return;
 
     if (!client)
@@ -356,7 +356,7 @@ void handle_stop()
 
     if (const auto res = client.stop(); res != ESP_OK)
     {
-        ESP_LOGE(TAG, "Failed to stop MQTT client: %s", esp_err_to_name(res));
+        ESP_LOGE(TAG, "Failed to stop MQTT client: %s (mqttState=%d)", esp_err_to_name(res), std::to_underlying(mqttState));
         mqttState = MqttState::Error;
     }
     else

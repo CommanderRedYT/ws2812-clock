@@ -19,7 +19,7 @@ private:
 
     void render_all(CRGB* leds, size_t leds_length) override;
 
-    const char * getName() const override { return "Rainbow"; }
+    LedAnimationName getEnumValue() const override { return LedAnimationName::Rainbow; }
 
     uint8_t m_hue{0};
 };

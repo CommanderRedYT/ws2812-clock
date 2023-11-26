@@ -19,7 +19,7 @@ private:
 
     void render_dot(ClockDot& clockDot, CRGB* leds, size_t leds_length) override;
 
-    const char * getName() const override { return "StaticColor"; }
+    LedAnimationName getEnumValue() const override { return LedAnimationName::StaticColor; }
 };
 
 } // namespace animation

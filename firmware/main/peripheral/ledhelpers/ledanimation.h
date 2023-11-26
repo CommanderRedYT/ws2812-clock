@@ -13,6 +13,11 @@
 // local includes
 #include "peripheral/ledmanager.h"
 
+#define LedAnimationNameValues(x) \
+    x(Rainbow) \
+    x(StaticColor)
+DECLARE_GLOBAL_TYPESAFE_ENUM(LedAnimationName, : uint8_t, LedAnimationNameValues);
+
 namespace animation {
 
 class LedAnimation
@@ -53,7 +58,7 @@ public:
         m_lastRender = espchrono::millis_clock::now();
     }
 
-    virtual const char * getName() const = 0;
+    virtual LedAnimationName getEnumValue() const = 0;
 
     virtual espchrono::milliseconds32 getUpdateInterval() const = 0;
 
@@ -92,9 +97,8 @@ extern LedAnimation* currentAnimation;
 
 const LedAnimation& getFirstAnimation();
 
-std::expected<void, std::string> updateAnimation(const char* name, ledmanager::LedArray& leds);
+std::expected<void, std::string> updateAnimation(LedAnimationName enumValue, ledmanager::LedArray& leds);
 
-bool animationExists(const char* name);
-bool animationExists(const std::string& name);
+bool animationExists(LedAnimationName enumValue);
 
 } // namespace animation

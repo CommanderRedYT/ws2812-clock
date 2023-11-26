@@ -41,12 +41,64 @@ typename std::enable_if<
         !std::is_same_v<T, sntp_sync_mode_t> &&
         !std::is_same_v<T, espchrono::DayLightSavingMode> &&
         !typeutils::is_optional_v<T> &&
-        !std::is_same_v<T, cpputils::ColorHelper>
+        !std::is_same_v<T, cpputils::ColorHelper> &&
+        !std::is_same_v<T, SecondaryBrightnessMode> &&
+        !std::is_same_v<T, LedAnimationName> &&
+        !is_duration_v<T>
         , FromJsonReturnType>::type
 fromJson(ConfigWrapper<T>& config, const std::string_view value)
 {
     ESP_LOGW("fromJson", "fromJson not implemented for type %s (nvsKey=%s)", t_to_str<T>::str, config.nvsName());
     return std::unexpected(fmt::format("fromJson not implemented for type {} (nvsKey={})", t_to_str<T>::str, config.nvsName()));
+}
+
+template<typename T>
+typename std::enable_if<
+        std::is_same_v<T, SecondaryBrightnessMode> ||
+        std::is_same_v<T, LedAnimationName>
+        , FromJsonReturnType>::type
+fromJson(ConfigWrapper<T>& config, const std::string_view value)
+{
+    if (const auto res = parseEnum<T>::parse(value); res.has_value())
+        return configs.write_config(config, res.value());
+    else
+        return std::unexpected(fmt::format("Invalid value for {}: {} ({})", t_to_str<T>::str, value, res.error()));
+}
+
+template<typename T>
+typename std::enable_if<
+        std::is_same_v<T, espchrono::seconds32>
+        , FromJsonReturnType>::type
+fromJson(ConfigWrapper<T>& config, const std::string_view value)
+{
+    if (auto parsed = cpputils::fromString<int32_t>(value))
+        return configs.write_config(config, espchrono::seconds32{*parsed});
+    else
+        return std::unexpected(fmt::format("Invalid value for duration: {}", value));
+}
+
+template<typename T>
+typename std::enable_if<
+        std::is_same_v<T, espchrono::minutes32>
+        , FromJsonReturnType>::type
+fromJson(ConfigWrapper<T>& config, const std::string_view value)
+{
+    if (auto parsed = cpputils::fromString<int32_t>(value))
+        return configs.write_config(config, espchrono::minutes32{*parsed});
+    else
+        return std::unexpected(fmt::format("Invalid value for duration: {}", value));
+}
+
+template<typename T>
+typename std::enable_if<
+        std::is_same_v<T, espchrono::milliseconds32>
+        , FromJsonReturnType>::type
+fromJson(ConfigWrapper<T>& config, const std::string_view value)
+{
+    if (auto parsed = cpputils::fromString<int32_t>(value))
+        return configs.write_config(config, espchrono::milliseconds32{*parsed});
+    else
+        return std::unexpected(fmt::format("Invalid value for duration: {}", value));
 }
 
 template<typename T>
@@ -79,7 +131,7 @@ typename std::enable_if<
         !std::is_same_v<T, bool>
         , FromJsonReturnType>::type
 fromJson(ConfigWrapper<T>& config, const std::string_view value)
-{;
+{
     if (auto parsed = cpputils::fromString<T>(value))
         return configs.write_config(config, *parsed);
     else

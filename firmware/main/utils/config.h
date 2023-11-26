@@ -155,6 +155,44 @@ public:
     } staticDns2;
 };
 
+struct TimeRangeConfigWrapper
+{
+    TimeRangeConfigWrapper(const char *startNvsKey, const char *endNvsKey) : start{startNvsKey}, end{endNvsKey} {}
+
+    using seconds32 = espchrono::seconds32;
+
+    struct : ConfigWrapperDynamicKey<seconds32>
+    {
+        using ConfigWrapperDynamicKey<seconds32>::ConfigWrapperDynamicKey;
+
+        bool allowReset() const final { return true; }
+        value_t defaultValue() const final { return {}; }
+        ConfigConstraintReturnType checkValue(value_t value) const final
+        {
+            if (value < 0s || value > 24h) {
+                return std::unexpected("TimeRange::start should be positive and below 24h");
+            }
+
+            return {};
+        }
+    } start;
+    struct : ConfigWrapperDynamicKey<seconds32>
+    {
+        using ConfigWrapperDynamicKey<seconds32>::ConfigWrapperDynamicKey;
+
+        bool allowReset() const final { return true; }
+        value_t defaultValue() const final { return {}; }
+        ConfigConstraintReturnType checkValue(value_t value) const final
+        {
+            if (value < 0s || value > 24h) {
+                return std::unexpected("TimeRange::start should be positive and below 24h");
+            }
+
+            return {};
+        }
+    } end;
+};
+
 class ConfigContainer;
 
 extern ConfigManager<ConfigContainer> configs;
@@ -284,9 +322,28 @@ public:
     {
         bool allowReset() const final { return true; }
         const char* nvsName() const final { return "ledBrightness"; }
-        value_t defaultValue() const final { return 10; }
+        value_t defaultValue() const final { return 50; }
         ConfigConstraintReturnType checkValue(value_t value) const final { return {}; }
     } ledBrightness;
+    struct : ConfigWrapper<uint8_t>
+    {
+        bool allowReset() const final { return true; }
+        const char* nvsName() const final { return "secondaryBright"; }
+        value_t defaultValue() const final { return 10; }
+        ConfigConstraintReturnType checkValue(value_t value) const final { return {}; }
+    } ledSecondaryBrightness;
+    struct : ConfigWrapper<uint8_t>
+    {
+        bool allowReset() const final { return true; }
+        const char* nvsName() const final { return "basicLedBright"; }
+        value_t defaultValue() const final { return 10; }
+        ConfigConstraintReturnType checkValue(value_t value) const final {
+            if (value > 100) {
+                return std::unexpected("Value must be between 0 and 100");
+            }
+            return {};
+        }
+    } basicLedBrightness;
 
     // Time
     struct : ConfigWrapper<minutes32>
@@ -303,6 +360,14 @@ public:
         value_t defaultValue() const final { return DayLightSavingMode::EuropeanSummerTime; }
         ConfigConstraintReturnType checkValue(value_t value) const final { return {}; }
     } timeDst;
+    TimeRangeConfigWrapper secondaryBrightnessTimeRange{"secoBriRaStart", "secoBriRaEnd"};
+    struct : ConfigWrapper<SecondaryBrightnessMode>
+    {
+        bool allowReset() const final { return true; }
+        const char *nvsName() const final { return "seconBrightMode"; }
+        value_t defaultValue() const final { return SecondaryBrightnessMode::Off; }
+        ConfigConstraintReturnType checkValue(value_t value) const final { return {}; }
+    } secondaryBrightnessMode;
 
     // NTP
     struct : ConfigWrapper<std::string>
@@ -322,7 +387,7 @@ public:
     struct : ConfigWrapper<milliseconds32>
     {
         bool allowReset() const final { return false; }
-        const char *nvsName() const final { return "timeSyncInterval"; }
+        const char *nvsName() const final { return "tSyncInterval"; }
         value_t defaultValue() const final { return milliseconds32{CONFIG_LWIP_SNTP_UPDATE_DELAY}; }
         ConfigConstraintReturnType checkValue(value_t value) const final { return MinTimeSyncInterval(value); }
     } timeSyncInterval;
@@ -362,15 +427,15 @@ public:
     struct : ConfigWrapper<bool>
     {
         bool allowReset() const final { return true; }
-        const char *nvsName() const final { return "showUnsyncedTime"; }
+        const char *nvsName() const final { return "showUnsyncdTime"; }
         value_t defaultValue() const final { return false; }
         ConfigConstraintReturnType checkValue(value_t value) const final { return {}; }
     } showUnsyncedTime;
-    struct : ConfigWrapper<std::string>
+    struct : ConfigWrapper<LedAnimationName>
     {
         bool allowReset() const final { return true; }
         const char *nvsName() const final { return "ledAnimation"; }
-        std::string defaultValue() const final { return animation::getFirstAnimation().getName(); }
+        value_t defaultValue() const final { return animation::getFirstAnimation().getEnumValue(); }
         ConfigConstraintReturnType checkValue(value_t value) const final
         {
             if (!animation::animationExists(value))
@@ -470,10 +535,15 @@ public:
 
         // LED
         ITER_CONFIG(ledBrightness)
+        ITER_CONFIG(ledSecondaryBrightness)
+        ITER_CONFIG(basicLedBrightness)
 
         // Time
         ITER_CONFIG(timeOffset)
         ITER_CONFIG(timeDst)
+        ITER_CONFIG(secondaryBrightnessTimeRange.start)
+        ITER_CONFIG(secondaryBrightnessTimeRange.end)
+        ITER_CONFIG(secondaryBrightnessMode)
 
         // NTP
         ITER_CONFIG(timeServer)

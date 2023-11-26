@@ -6,6 +6,7 @@
 #include <utility>
 
 // 3rdparty lib includes
+#include <cpptypesafeenum.h>
 #include <delayedconstruction.h>
 #include <espchrono.h>
 #include <wrappers/recursive_mutex_semaphore.h>
@@ -13,6 +14,12 @@
 // local includes
 #include "ledhelpers/digit.h"
 #include "ledhelpers/clockdot.h"
+
+#define SecondaryBrightnessModeValues(x) \
+    x(Off) \
+    x(UseRange) \
+    x(UseSunriseSunset)
+DECLARE_GLOBAL_TYPESAFE_ENUM(SecondaryBrightnessMode, : uint8_t, SecondaryBrightnessModeValues);
 
 namespace ledmanager {
 
