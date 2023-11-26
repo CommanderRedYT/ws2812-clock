@@ -9,14 +9,14 @@ jobs:
     name: Checkout
     steps:
       - name: Cache repository
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: cache-repository
         with:
           path: repository
-          key: ${{ runner.os }}-repository-${{ github.sha }}
+          key: ${{ runner.os }}-repository
 
-      - name: Checkout (without submodules)
-        uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v3
         with:
           path: repository
           submodules: recursive
@@ -28,7 +28,7 @@ jobs:
       - checkout
     steps:
       - name: Cache repository
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: cache-repository
         with:
           path: repository
@@ -40,13 +40,11 @@ jobs:
 
       - name: Get esp-idf release name
         id: get-esp-idf-release
-        uses: 0xFEEDC0DE64/get_latest_tag@main
-        with:
-          repo: repository/firmware/esp-idf
+        run: echo "::set-output name=tag_name::$(git -C repository/firmware/esp-idf describe --tags --abbrev=0)"
 
       - name: Cache .espressif
         id: cache-espressif
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.espressif
           key: ${{ runner.os }}-espressif-${{ steps.get-esp-idf-release.outputs.tag_name }}
@@ -67,7 +65,7 @@ jobs:
       - install-idf
     steps:
       - name: Cache repository
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: cache-repository
         with:
           path: repository
@@ -83,7 +81,7 @@ jobs:
 
       - name: Cache .espressif
         id: cache-espressif
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.espressif
           key: ${{ runner.os }}-espressif-${{ steps.get-esp-idf-release.outputs.tag_name }}
@@ -116,7 +114,7 @@ jobs:
           echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
 
       - name: Upload Build Artifact
-        uses: actions/upload-artifact@v2.2.4
+        uses: actions/upload-artifact@3.1.3
         with:
           name: clock_${{ matrix.node }}
           path: |
