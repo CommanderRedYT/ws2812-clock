@@ -109,6 +109,6 @@ jobs:
       - name: Upload Build Artifact
         uses: actions/upload-artifact@3.1.3
         with:
-          name: clock_${{ matrix.node }}
+          name: ws2812-clock_${{ matrix.node }}
           path: |
-            repository/firmware/build_${{ matrix.node }}/bobbyquad_${{ matrix.node }}.bin
+            repository/firmware/build_${{ matrix.node }}/ws2812-clock.bin
