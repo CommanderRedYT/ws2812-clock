@@ -421,6 +421,13 @@ public:
         std::string defaultValue() const final { return "homeassistant/"; }
         ConfigConstraintReturnType checkValue(value_t value) const final { return StringMinMaxSize<1, 64>(value); }
     } hassMqttTopic;
+    struct : ConfigWrapper<milliseconds32>
+    {
+        bool allowReset() const final { return false; }
+        const char *nvsName() const final { return "mqttPubInterval"; }
+        value_t defaultValue() const final { return milliseconds32{60000}; } // 1 minute
+        ConfigConstraintReturnType checkValue(value_t value) const final { return {}; }
+    } mqttPublishInterval;
 
     // Customization
     /*-- Hide Clock while NTP sync has not finished --*/
@@ -555,6 +562,7 @@ public:
         ITER_CONFIG(mqttUrl)
         ITER_CONFIG(mqttTopic)
         ITER_CONFIG(hassMqttTopic)
+        ITER_CONFIG(mqttPublishInterval)
 
         // Customization
         ITER_CONFIG(showUnsyncedTime)
