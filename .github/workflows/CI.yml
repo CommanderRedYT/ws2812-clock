@@ -79,9 +79,7 @@ jobs:
 
       - name: Get esp-idf release name
         id: get-esp-idf-release
-        uses: 0xFEEDC0DE64/get_latest_tag@main
-        with:
-          repo: repository/firmware/esp-idf
+        run: echo "::set-output name=tag_name::$(git -C repository/firmware/esp-idf describe --tags --abbrev=0)"
 
       - name: Cache .espressif
         id: cache-espressif
