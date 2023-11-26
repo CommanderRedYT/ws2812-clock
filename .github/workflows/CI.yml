@@ -138,3 +138,13 @@ jobs:
           name: ws2812-clock_${{ matrix.node }}
           path: |
             repository/firmware/build_${{ matrix.node }}/ws2812-clock.bin
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          generate_release_notes: true
+          prerelease: false
+          files: |
+            repository/firmware/build_${{ matrix.node }}/ws2812-clock.bin
