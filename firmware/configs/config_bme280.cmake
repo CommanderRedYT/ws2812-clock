@@ -1,7 +1,6 @@
 set(APP_NAME ws2812-clock)
 
 add_definitions(
-    -DUSER_SETUP_LOADED=1
     -fdiagnostics-color=always
 
     # I2C Config / sensors
