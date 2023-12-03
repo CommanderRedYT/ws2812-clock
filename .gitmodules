@@ -1,6 +1,6 @@
 [submodule "firmware/esp-idf"]
 	path = firmware/esp-idf
-	url = git@github.com:espressif/esp-idf.git
+	url = git@github.com:CommanderRedYT/esp-idf.git
 [submodule "firmware/components/arduino-esp32"]
 	path = firmware/components/arduino-esp32
 	url = git@github.com:CommanderRedYT/arduino-esp32.git
