@@ -1,7 +1,10 @@
 #pragma once
 
+// system includes
+#include <optional>
+
 // 3rdparty lib includes
-#include "espchrono.h"
+#include <espchrono.h>
 
 namespace espclock {
 
@@ -14,5 +17,11 @@ void update();
 void syncNow();
 
 bool isSynced();
+
+const std::optional<espchrono::utc_clock::time_point>& sunrise();
+
+const std::optional<espchrono::utc_clock::time_point>& sunset();
+
+bool isNight();
 
 } // namespace espclock

@@ -24,4 +24,9 @@ window.addEventListener('load', () => {
     window.clockApi.on('onOffline', () => {
         handleClearConfig();
     });
+
+    document.getElementById('switchOta').addEventListener('click', async () => {
+        const result = await window.clockApi.switchOta();
+        document.getElementById('switchOtaResult').innerText = JSON.stringify(result, null, 4);
+    });
 });

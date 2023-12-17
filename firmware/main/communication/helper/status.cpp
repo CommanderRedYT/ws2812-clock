@@ -11,6 +11,7 @@
 #include "peripheral/ledhelpers/ledanimation.h"
 #include "peripheral/ledmanager.h"
 #include "utils/config.h"
+#include "utils/espclock.h"
 
 using namespace webserver;
 using namespace std::chrono_literals;
@@ -25,6 +26,8 @@ double round2(double value) {
 
 esp_err_t generateStatusJson(JsonObject& statusObj)
 {
+    statusObj["version"] = VERSION;
+
     {
         auto timeObj = statusObj.createNestedObject("time");
 
@@ -33,6 +36,17 @@ esp_err_t generateStatusJson(JsonObject& statusObj)
         timeObj["utc"] = toString(toDateTime(espchrono::utc_clock::now()));
         timeObj["offset"] = espchrono::local_clock::now().timezone.offset.count();
         timeObj["dst"] = toString(espchrono::local_clock::now().timezone.dayLightSavingMode);
+        timeObj["synced"] = espclock::isSynced();
+        if (const auto res = espclock::sunrise(); res)
+            timeObj["sunrise"] = toString(toDateTime(const_cast<espchrono::utc_clock::time_point&>(*res)));
+        else
+            timeObj["sunrise"] = nullptr;
+
+        if (const auto res = espclock::sunset(); res)
+            timeObj["sunset"] = toString(toDateTime(const_cast<espchrono::utc_clock::time_point&>(*res)));
+        else
+            timeObj["sunset"] = nullptr;
+        timeObj["night"] = espclock::isNight();
     }
 
     {

@@ -468,16 +468,16 @@ esp_err_t api_get_ota_status_handler(httpd_req_t* req)
     if (ota::otherAppDesc)
     {
         auto& appDesc = *ota::otherAppDesc;
-        auto currentAppObj = doc.createNestedObject("otherApp");
+        auto otherAppObj = doc.createNestedObject("otherApp");
 
-        currentAppObj["version"] = appDesc.version;
-        // currentAppObj["app_elf_sha256"] = appDesc.app_elf_sha256;
-        currentAppObj["date"] = appDesc.date;
-        currentAppObj["idf_ver"] = appDesc.idf_ver;
-        currentAppObj["magic_word"] = appDesc.magic_word;
-        currentAppObj["project_name"] = appDesc.project_name;
-        currentAppObj["secure_version"] = appDesc.secure_version;
-        currentAppObj["time"] = appDesc.time;
+        otherAppObj["version"] = appDesc.version;
+        // otherAppObj["app_elf_sha256"] = appDesc.app_elf_sha256;
+        otherAppObj["date"] = appDesc.date;
+        otherAppObj["idf_ver"] = appDesc.idf_ver;
+        otherAppObj["magic_word"] = appDesc.magic_word;
+        otherAppObj["project_name"] = appDesc.project_name;
+        otherAppObj["secure_version"] = appDesc.secure_version;
+        otherAppObj["time"] = appDesc.time;
     }
     else
     {
@@ -576,6 +576,37 @@ esp_err_t api_trigger_ota_handler(httpd_req_t* req)
     return ESP_OK;
 }
 
+esp_err_t api_switch_ota_handler(httpd_req_t* req)
+{
+    ESP_LOGI(TAG, "POST /api/ota/switch");
+
+    espcpputils::RecursiveLockHelper lockHelper{global::global_lock->handle};
+
+    if (const auto res = cors_handler(req); res != ESP_OK)
+        return res;
+
+    if (const auto ota_res = ota::switchAppPartition(); ota_res)
+    {
+        if (const auto res = esphttpdutils::webserver_resp_send(req, esphttpdutils::ResponseStatus::Ok,
+                                                                "application/json", R"({"success":true})"); res !=
+                                                                                                            ESP_OK)
+        {
+            ESP_LOGE(TAG, "Failed to send response: %s", esp_err_to_name(res));
+            return res;
+        }
+    }
+    else
+    {
+        const auto msg = fmt::format("{{\"success\":false,\"message\":\"Failed to switch OTA partition ({})\"}}", ota_res.error());
+        ESP_LOGE(TAG, "%.*s", msg.size(), msg.data());
+        if (const auto res = esphttpdutils::webserver_resp_send(req, esphttpdutils::ResponseStatus::InternalServerError, "application/json", msg); res != ESP_OK)
+            ESP_LOGE(TAG, "Failed to send response: %s", esp_err_to_name(res));
+        return ESP_FAIL;
+    }
+
+    return ESP_OK;
+}
+
 esp_err_t api_trigger_reboot_handler(httpd_req_t* req)
 {
     ESP_LOGI(TAG, "POST /api/reboot/trigger");
@@ -607,6 +638,7 @@ auto get_handlers()
         httpd_uri_t{ .uri = "/api/v1/tasks",      .method = HTTP_GET,  .handler = api_get_tasks_handler,      .user_ctx = nullptr },
         httpd_uri_t{ .uri = "/api/v1/ota",        .method = HTTP_GET,  .handler = api_get_ota_status_handler, .user_ctx = nullptr },
         httpd_uri_t{ .uri = "/api/v1/triggerOta", .method = HTTP_GET,  .handler = api_trigger_ota_handler,    .user_ctx = nullptr },
+        httpd_uri_t{ .uri = "/api/v1/switchOta",  .method = HTTP_GET,  .handler = api_switch_ota_handler,     .user_ctx = nullptr },
         httpd_uri_t{ .uri = "/api/v1/reboot",     .method = HTTP_GET,  .handler = api_trigger_reboot_handler, .user_ctx = nullptr }
     );
 }

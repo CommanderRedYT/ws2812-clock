@@ -2,9 +2,6 @@
 
 constexpr const char * const TAG = "BASICLEDS";
 
-// system includes
-#include <numbers>
-
 // esp-idf includes
 #include <driver/ledc.h>
 
@@ -141,7 +138,7 @@ void begin()
 
 void update()
 {
-    const auto now = espchrono::millis_clock::now();
+    // const auto now = espchrono::millis_clock::now();
 
     if (wifi::isStaConnected())
     {

@@ -93,7 +93,10 @@ bool isInSecondaryBrightnessTimeRange()
         }
     }
 
-    ESP_LOGD(TAG, "secondaryBrightnessMode is UseSunriseSunset");
+    if (secondaryBrightnessMode == SecondaryBrightnessMode::UseSunriseSunset)
+    {
+        return espclock::isNight();
+    }
 
     return false;
 }
