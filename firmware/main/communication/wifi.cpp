@@ -108,18 +108,12 @@ std::optional<wifi_stack::sta_config> createStaConfig()
 
     return wifi_stack::sta_config{
         .hostname = configs.hostname.value(),
-        .wifis = std::array<wifi_stack::wifi_entry, 10> {
-            createWiFiEntry(configs.wifis[0]),
-            createWiFiEntry(configs.wifis[1]),
-            createWiFiEntry(configs.wifis[2]),
-            createWiFiEntry(configs.wifis[3]),
-            createWiFiEntry(configs.wifis[4]),
-            createWiFiEntry(configs.wifis[5]),
-            createWiFiEntry(configs.wifis[6]),
-            createWiFiEntry(configs.wifis[7]),
-            createWiFiEntry(configs.wifis[8]),
-            createWiFiEntry(configs.wifis[9])
-        },
+        .wifis = []() {
+            std::array<wifi_stack::wifi_entry, CONFIG_WIFI_STA_CONFIG_COUNT> wifis;
+            for (size_t i = 0; i < CONFIG_WIFI_STA_CONFIG_COUNT; ++i)
+                wifis[i] = createWiFiEntry(configs.wifis[i]);
+            return wifis;
+        }(),
         .min_rssi = -90,
         .long_range = false,
     };

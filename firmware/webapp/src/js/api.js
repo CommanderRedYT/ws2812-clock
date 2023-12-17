@@ -197,6 +197,11 @@ export class ClockApi {
         return await response.json();
     }
 
+    async switchOta() {
+        const response = await fetch(`${this.apiBase}/switchOta`);
+        return await response.json();
+    }
+
     getConfig(key) {
         return this.config[key];
     }

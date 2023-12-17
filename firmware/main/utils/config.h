@@ -240,17 +240,12 @@ public:
         ConfigConstraintReturnType checkValue(value_t value) const final { return {}; }
     } wifiStaEnabled;
 
-    std::array<WiFiConfig, 10> wifis {
+    std::array<WiFiConfig, CONFIG_WIFI_STA_CONFIG_COUNT> wifis {
         WiFiConfig{"wifi_ssid0", "wifi_key0", "wifi_usestatic0", "wifi_static_ip0", "wifi_stati_sub0", "wifi_stat_gate0", "wifi_usestadns0", "wifi_stat_dnsA0", "wifi_stat_dnsB0", "wifi_stat_dnsC0"},
         WiFiConfig{"wifi_ssid1", "wifi_key1", "wifi_usestatic1", "wifi_static_ip1", "wifi_stati_sub1", "wifi_stat_gate1", "wifi_usestadns1", "wifi_stat_dnsA1", "wifi_stat_dnsB1", "wifi_stat_dnsC1"},
         WiFiConfig{"wifi_ssid2", "wifi_key2", "wifi_usestatic2", "wifi_static_ip2", "wifi_stati_sub2", "wifi_stat_gate2", "wifi_usestadns2", "wifi_stat_dnsA2", "wifi_stat_dnsB2", "wifi_stat_dnsC2"},
         WiFiConfig{"wifi_ssid3", "wifi_key3", "wifi_usestatic3", "wifi_static_ip3", "wifi_stati_sub3", "wifi_stat_gate3", "wifi_usestadns3", "wifi_stat_dnsA3", "wifi_stat_dnsB3", "wifi_stat_dnsC3"},
         WiFiConfig{"wifi_ssid4", "wifi_key4", "wifi_usestatic4", "wifi_static_ip4", "wifi_stati_sub4", "wifi_stat_gate4", "wifi_usestadns4", "wifi_stat_dnsA4", "wifi_stat_dnsB4", "wifi_stat_dnsC4"},
-        WiFiConfig{"wifi_ssid5", "wifi_key5", "wifi_usestatic5", "wifi_static_ip5", "wifi_stati_sub5", "wifi_stat_gate5", "wifi_usestadns5", "wifi_stat_dnsA5", "wifi_stat_dnsB5", "wifi_stat_dnsC5"},
-        WiFiConfig{"wifi_ssid6", "wifi_key6", "wifi_usestatic6", "wifi_static_ip6", "wifi_stati_sub6", "wifi_stat_gate6", "wifi_usestadns6", "wifi_stat_dnsA6", "wifi_stat_dnsB6", "wifi_stat_dnsC6"},
-        WiFiConfig{"wifi_ssid7", "wifi_key7", "wifi_usestatic7", "wifi_static_ip7", "wifi_stati_sub7", "wifi_stat_gate7", "wifi_usestadns7", "wifi_stat_dnsA7", "wifi_stat_dnsB7", "wifi_stat_dnsC7"},
-        WiFiConfig{"wifi_ssid8", "wifi_key8", "wifi_usestatic8", "wifi_static_ip8", "wifi_stati_sub8", "wifi_stat_gate8", "wifi_usestadns8", "wifi_stat_dnsA8", "wifi_stat_dnsB8", "wifi_stat_dnsC8"},
-        WiFiConfig{"wifi_ssid9", "wifi_key9", "wifi_usestatic9", "wifi_static_ip9", "wifi_stati_sub9", "wifi_stat_gate9", "wifi_usestadns9", "wifi_stat_dnsA9", "wifi_stat_dnsB9", "wifi_stat_dnsC9"},
     };
 
     struct : ConfigWrapper<bool>
@@ -368,6 +363,21 @@ public:
         value_t defaultValue() const final { return SecondaryBrightnessMode::Off; }
         ConfigConstraintReturnType checkValue(value_t value) const final { return {}; }
     } secondaryBrightnessMode;
+    // default to vienna
+    struct : ConfigWrapper<float>
+    {
+        bool allowReset() const final { return true; }
+        const char *nvsName() const final { return "sunriseLat"; }
+        value_t defaultValue() const final { return 48.2082; }
+        ConfigConstraintReturnType checkValue(value_t value) const final { return {}; }
+    } sunriseLatitude;
+    struct : ConfigWrapper<float>
+    {
+        bool allowReset() const final { return true; }
+        const char *nvsName() const final { return "sunriseLong"; }
+        value_t defaultValue() const final { return 16.3738; }
+        ConfigConstraintReturnType checkValue(value_t value) const final { return {}; }
+    } sunriseLongitude;
 
     // NTP
     struct : ConfigWrapper<std::string>
@@ -558,6 +568,8 @@ public:
         ITER_CONFIG(secondaryBrightnessTimeRange.start)
         ITER_CONFIG(secondaryBrightnessTimeRange.end)
         ITER_CONFIG(secondaryBrightnessMode)
+        ITER_CONFIG(sunriseLatitude)
+        ITER_CONFIG(sunriseLongitude)
 
         // NTP
         ITER_CONFIG(timeServer)
