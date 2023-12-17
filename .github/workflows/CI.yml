@@ -54,8 +54,6 @@ jobs:
         with:
           path: repository
           submodules: recursive
-          fetch-depth: 1
-          fetch-tags: true
 
       - name: Install dependencies
         run: |
