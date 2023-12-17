@@ -25,7 +25,7 @@ jobs:
           path: repository
           key: ${{ runner.os }}-repository-${{ github.sha }}
 
-      - name: Cache npm & yarn
+      - name: Cache npm
         uses: actions/cache@v3
         with:
           path: ~/.npm
@@ -33,22 +33,35 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-npm-
 
-      - name: Set Node.js 16.x
+      - name: Cache yarn
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/yarn
+            ~/.yarn
+            node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Set Node.js 18.x
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: 18.x
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: repository
           submodules: recursive
+          fetch-depth: 1
+          fetch-tags: true
 
       - name: Install dependencies
         run: |
           npm install -g yarn
           cd repository/firmware/webapp
-          yarn install
+          yarn install --frozen-lockfile --prefer-offline
 
   install-idf:
     runs-on: ubuntu-latest
