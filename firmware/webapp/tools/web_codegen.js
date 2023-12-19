@@ -2,7 +2,6 @@
 import fs from 'fs';
 import path from 'path';
 import process from 'process';
-import { minify } from 'minify';
 import { gzip } from 'node-gzip';
 import mime from 'mime-types';
 import extraDependencies from "./dependencies.js";
@@ -103,12 +102,10 @@ async function main() {
     const compile = async (srcFile) => {
         console.log(`Compiling ${srcFile}`);
         let overrideName = null;
-        let skipMinify = false;
 
         if (Array.isArray(srcFile)) {
             overrideName = srcFile[1];
             srcFile = srcFile[0];
-            skipMinify = true;
         }
 
         // check if file is empty
@@ -117,19 +114,8 @@ async function main() {
             return;
         }
 
-        const extention = path.extname(srcFile);
-
-        if (!['.html', '.js', '.css'].includes(extention)) {
-            skipMinify = true;
-            console.warn(`Skip minify for ${srcFile} because it is not a html, js or css file`);
-        }
-
-        const minified = skipMinify ?
-            await fs.promises.readFile(srcFile) :
-            await minify(srcFile, {sourceMap: false, html: { removeScriptTypeAttributes: false, removeRedundantAttributes: false }, js: { ecma: 2015, compress: { passes: 2 }, ie8: true }});
-
         // create gzip file
-        const compressed = await gzip(minified); // compressed is a Buffer
+        const compressed = await gzip(await fs.promises.readFile(srcFile)); // compressed is a Buffer
 
         const name = path
             .relative(srcDir, srcFile)
@@ -148,10 +134,6 @@ async function main() {
         const size = compressed.length;
 
         const mimeType = mime.lookup(srcFile) || 'text/plain';
-
-        if (size < 50) {
-            console.log(minified);
-        }
 
         totalSize += size;
 

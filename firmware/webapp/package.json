@@ -15,7 +15,6 @@
     "express": "^4.18.2",
     "jquery": "^3.7.1",
     "mime-types": "^2.1.35",
-    "minify": "^10.5.2",
     "node-gzip": "^1.1.2",
     "process": "^0.11.10"
   },
