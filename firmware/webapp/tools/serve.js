@@ -16,6 +16,7 @@ app.use(express.static('src'));
 extraDependencies.forEach(([path, name]) => {
     console.log(`app.use('/${name}', express.static('${path}'));`);
     app.use(`/${name}`, express.static(path));
+    app.use(`/${name}.map`, express.static(`${path}.map`));
 });
 
 // not found handler

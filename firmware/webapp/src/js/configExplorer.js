@@ -22,6 +22,7 @@ const inputFromType = (config, type) => {
     switch (type) {
         case "enum": {
             const select = document.createElement("select");
+            select.classList.add("form-select");
             const values = config.value.values;
 
             values.forEach((value) => {
@@ -56,17 +57,29 @@ const inputFromType = (config, type) => {
 
 const createConfigSetForm = (key, config) => {
     const form = document.createElement("form");
+
+    const inputGroup = document.createElement("div");
+    inputGroup.classList.add("input-group");
+
     const input = inputFromType(config, parseType(config));
     const button = document.createElement("button");
+    button.classList.add("btn", "btn-primary");
 
     input.setAttribute("name", key);
     input.setAttribute("data-type", config.type);
+    input.setAttribute("data-value", JSON.stringify(config.value));
+    input.classList.add("form-control");
 
     button.setAttribute("type", "submit");
     button.innerText = "Set";
 
-    form.appendChild(input);
-    form.appendChild(button);
+    inputGroup.appendChild(input);
+    inputGroup.appendChild(button);
+
+    // make input group large enough to fit input and button (min-width)
+    inputGroup.style.minWidth = `200px`;
+
+    form.appendChild(inputGroup);
 
     return form;
 };
@@ -89,11 +102,21 @@ const createOrUpdateConfigRow = (key, config) => {
         value = row.querySelector("td:nth-child(2)");
         type = row.querySelector("td:nth-child(3)");
         set = row.querySelector("td:nth-child(4) form");
+
+        if (!set) {
+            console.error('no set found', row);
+            return null;
+        }
+
         result = set.querySelector("[data-result]");
     } else {
         row = document.createElement("tr");
         name = document.createElement("td");
+        name.setAttribute("scope", "row");
+        name.setAttribute("data-key", key);
         value = document.createElement("td");
+        value.setAttribute("data-key", key);
+        value.setAttribute("data-value", JSON.stringify(config.value));
         type = document.createElement("td");
         set = document.createElement("td");
         set.appendChild(createConfigSetForm(key, config));
@@ -115,10 +138,30 @@ const createOrUpdateConfigRow = (key, config) => {
 
                 window.clockApi.setConfig({[key]: value}).then((result) => {
                     resultElement.innerText = JSON.stringify(result);
+                    resultElement.classList.remove("text-danger");
+
+                    resultElement.classList.add(result.success ? "text-success" : "text-danger");
+
+                    for (const obj of Object.values(result.keys)) {
+                        const { key, value } = obj;
+                        const valueElement = document.querySelector(
+                            `td[data-key="${key}"][data-value]`
+                        );
+
+                        if (!valueElement) {
+                            console.warn("no value element found", obj);
+                            continue;
+                        }
+
+                        valueElement.setAttribute("data-value", JSON.stringify(obj));
+                        valueElement.innerText = JSON.stringify(value);
+                    }
                 });
             } catch (e) {
                 console.error('hatschi', e, inputOrSelect);
                 resultElement.innerText = e.message;
+                resultElement.classList.remove("text-success");
+                resultElement.classList.add("text-danger");
             }
         });
 
