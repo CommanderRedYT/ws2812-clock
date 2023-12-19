@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>WS2812B</title>
+    <title>WS2812B-Clock</title>
 
     <!-- Icons -->
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
@@ -21,41 +21,90 @@
     <script src="/js/main.js" defer type="module"></script>
     <script src="/js/api.js" defer type="module"></script>
 </head>
-<body>
-<div>
-    <div class="container mb-3">
-        <h1>
-            Debug
-        </h1>
-        <pre id="status"></pre>
-        <pre id="ota"></pre>
+<body data-theme="$theme">
+<div class="container-fluid mt-3">
+    <div class="container mb-3 mt-1 d-flex justify-content-between">
+        <div>
+            <h1>WS2812B-Clock <span class="badge bg-danger" id="online">Offline</span></h1>
+            <p>Control your WS2812-Clock via this web interface.</p>
+        </div>
+        <div class="mt-3">
+            <button class="btn btn-primary down-toggle d-flex align-items-center" id="theme" type="button"
+                    data-bs-toggle="dropdown">
+                <span id="theme-text">Toggle theme</span>
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="theme-text">
+                <li>
+                    <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="light">
+                        Light
+                    </button>
+                </li>
+                <li>
+                    <button type="button" class="dropdown-item d-flex align-items-center"
+                            data-bs-theme-value="dark">
+                        Dark
+                    </button>
+                </li>
+                <li>
+                    <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="auto">
+                        Auto
+                    </button>
+                </li>
+            </ul>
+        </div>
     </div>
+    <hr class="mb-3">
     <div class="container mb-3">
         <h2>Over The Air Update</h2>
-        <form id="triggerOtaForm" action="/api/v1/triggerOta" method="get">
-            <input type="url" name="url" id="url" placeholder="url">
-            <input type="submit" type="button" value="trigger OTA" id="triggerOta">
-        </form>
-        <div>
-            <button id="switchOta" type="button">Switch OTA partition</button>
+        <div class="mb-3">
+            <form id="triggerOtaForm" action="/api/v1/triggerOta" method="get">
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Download Url</span>
+                    <input type="url" name="url" id="otaUrl" placeholder="http://github.com/CommanderRedYT/ws2812-clock/releases/download/.../ws2812-clock.bin" class="form-control">
+                    <button type="submit" id="triggerOta" class="btn btn-primary">Trigger OTA</button>
+                </div>
+                <div class="progress mb-3" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="height: 25px">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" id="otaProgress"
+                         style="width: 0%"></div>
+                </div>
+                <p id="otaStatus" class="mb-1">Ota Status: -</p>
+                <p id="otaMessage">Ota Message: -</p>
+                <div class="d-flex flex-row gap-1">
+                    <div class="mb-3 flex-grow-1" id="currentOtaPartition"></div>
+                    <div class="mb-3 flex-grow-1" id="otherOtaPartition"></div>
+                </div>
+            </form>
+        </div>
+        <div class="mb-3">
+            <button id="switchOta" type="button" class="btn btn-info">Switch OTA partition</button>
+            <button id="reboot" type="button" class="btn btn-danger">Reboot</button>
             <pre id="switchOtaResult"></pre>
         </div>
     </div>
-    <div class="container-fluid mb-3">
+    <hr class="mb-3">
+    <div class="container mb-3">
+        <h2>Releases</h2>
+        <div id="releases"></div>
+    </div>
+    <hr>
+    <div class="container mb-3">
         <h2 class="mb-1">Config Explorer (Debug)</h2>
-        <p class="mb-3">This is a debug view of the config. Only use this if you know what you are doing. <b>(No, you do not know what you are doing, so do not even think about it!)</b></p>
-        <table id="configExplorer" class="table table-striped table-hover">
-            <thead>
-            <tr>
-                <th scope="col">Key</th>
-                <th scope="col">Value</th>
-                <th scope="col">Datatype</th>
-                <th scope="col">Set</th>
-            </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
+        <p class="mb-3">This is a debug view of the config. Only use this if you know what you are doing. <b>(No, you do
+            not know what you are doing, so do not even think about it!)</b></p>
+        <div class="table-responsive">
+            <table id="configExplorer" class="table table-striped table-hover" data-theme="table-$theme">
+                <thead>
+                <tr>
+                    <th scope="col">Key</th>
+                    <th scope="col">Value</th>
+                    <th scope="col">Datatype</th>
+                    <th scope="col">Set</th>
+                </tr>
+                </thead>
+                <tbody class="table-group-divider">
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 </body>

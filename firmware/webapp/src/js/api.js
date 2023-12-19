@@ -149,36 +149,56 @@ export class ClockApi {
     }
 
     async fetchLeds() {
+        if (this.otastatus?.isInProgress) {
+            console.log('fetchLeds: ota in progress, skipping');
+            return;
+        }
+
         const controller = new AbortController();
         setTimeout(() => controller.abort(), 3000);
 
-        const response = await fetch(`${this.apiBase}/leds`, { signal: controller.signal });
-        this.leds = await response.json();
-        if (this.onLedsChange)
-            this.onLedsChange(this.leds);
-        return this.leds;
+        try {
+            const response = await fetch(`${this.apiBase}/leds`, {signal: controller.signal});
+            this.leds = await response.json();
+            if (this.onLedsChange)
+                this.onLedsChange(this.leds);
+            return this.leds;
+        } catch (e) {
+            console.error('fetchLeds', e);
+            return null;
+        }
     }
 
     async fetchTasks() {
         const controller = new AbortController();
-        setTimeout(() => controller.abort(), 3000);
+        setTimeout(() => controller.abort(), 1000);
 
-        const response = await fetch(`${this.apiBase}/tasks`, { signal: controller.signal });
-        this.tasks = await response.json();
-        if (this.onTasksChange)
-            this.onTasksChange(this.tasks);
-        return this.tasks;
+       try {
+           const response = await fetch(`${this.apiBase}/tasks`, {signal: controller.signal});
+           this.tasks = await response.json();
+           if (this.onTasksChange)
+               this.onTasksChange(this.tasks);
+           return this.tasks;
+       } catch (e) {
+          console.error('fetchTasks', e);
+          return null;
+       }
     }
 
     async fetchOtaStatus() {
         const controller = new AbortController();
-        setTimeout(() => controller.abort(), 3000);
+        setTimeout(() => controller.abort(), 1000);
 
-        const response = await fetch(`${this.apiBase}/ota`, { signal: controller.signal });
-        this.otastatus = await response.json();
-        if (this.onOtaStatusChange)
-            this.onOtaStatusChange(this.otastatus);
-        return this.otastatus;
+        try {
+            const response = await fetch(`${this.apiBase}/ota`, {signal: controller.signal});
+            this.otastatus = await response.json();
+            if (this.onOtaStatusChange)
+                this.onOtaStatusChange(this.otastatus);
+            return this.otastatus;
+        } catch (e) {
+            console.error('fetchOtaStatus', e);
+            return null;
+        }
     }
 
     async setConfig(config) {
