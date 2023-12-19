@@ -139,6 +139,7 @@ jobs:
           . export.sh
           ./switchconf.sh ${{ matrix.node }}
           idf.py build
+          git status
 
       - name: Set outputs
         id: vars

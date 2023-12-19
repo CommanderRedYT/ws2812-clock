@@ -522,7 +522,7 @@ esp_err_t api_trigger_ota_handler(httpd_req_t* req)
     else
     {
         ESP_LOGE(TAG, "%.*s", result.error().size(), result.error().data());
-        if (const auto res = esphttpdutils::webserver_resp_send(req, esphttpdutils::ResponseStatus::BadRequest, "application/json", fmt::format("{{\"success\":false,\"message\":\"{}\"}}", result.error())); res != ESP_OK)
+        if (const auto res = esphttpdutils::webserver_resp_send(req, esphttpdutils::ResponseStatus::BadRequest, "application/json", fmt::format(R"({{"success":false,"message":"{}"}})", result.error())); res != ESP_OK)
             ESP_LOGE(TAG, "Failed to send response: %s", esp_err_to_name(res));
         return ESP_FAIL;
     }
@@ -544,7 +544,7 @@ esp_err_t api_trigger_ota_handler(httpd_req_t* req)
             }
             else
             {
-                const auto msg = fmt::format("{{\"success\":false,\"message\":\"Failed to get parameter '{}' ({})\"}})", urlParamName, esp_err_to_name(result));
+                const auto msg = fmt::format("{{\"success\":false,\"message\":\"Failed to get parameter '{}' ({})\"}}", urlParamName, esp_err_to_name(result));
                 ESP_LOGE(TAG, "%.*s", msg.size(), msg.data());
                 if (const auto res = esphttpdutils::webserver_resp_send(req, esphttpdutils::ResponseStatus::BadRequest, "application/json", msg); res != ESP_OK)
                     ESP_LOGE(TAG, "Failed to send response: %s", esp_err_to_name(res));
@@ -560,11 +560,19 @@ esp_err_t api_trigger_ota_handler(httpd_req_t* req)
 
     if (const auto otaRes = ota::trigger(url); !otaRes)
     {
-        const auto msg = fmt::format("{{\"success\":false,\"message\":\"Failed to trigger OTA ({})\"}})", otaRes.error());
+        const auto msg = fmt::format("{{\"success\":false,\"message\":\"Failed to trigger OTA ({})\"}}", otaRes.error());
         ESP_LOGE(TAG, "%.*s", msg.size(), msg.data());
         if (const auto res = esphttpdutils::webserver_resp_send(req, esphttpdutils::ResponseStatus::InternalServerError, "application/json", msg); res != ESP_OK)
             ESP_LOGE(TAG, "Failed to send response: %s", esp_err_to_name(res));
         return ESP_FAIL;
+    }
+
+    // set redirect header to /
+    if (const auto res = httpd_resp_set_hdr(req, "Location", "/");
+        res != ESP_OK)
+    {
+        ESP_LOGE(TAG, "Failed to set header: %s", esp_err_to_name(res));
+        return res;
     }
 
     if (const auto res = esphttpdutils::webserver_resp_send(req, esphttpdutils::ResponseStatus::Ok, "application/json", R"({"success":true})"); res != ESP_OK)

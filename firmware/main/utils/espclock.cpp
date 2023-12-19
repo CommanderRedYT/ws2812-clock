@@ -4,6 +4,7 @@ constexpr const char * const TAG = "espclock";
 
 // esp-idf includes
 #include <apps/esp_sntp.h>
+#include <esp_ota_ops.h>
 
 // 3rdparty lib includes
 #include <espchrono.h>
@@ -86,6 +87,7 @@ bool isNight()
 
 namespace {
 bool time_synced{false};
+bool time_synced_prev{false};
 
 void time_sync_notification_cb(struct timeval *tv)
 {
@@ -162,6 +164,13 @@ void syncNow()
 
 bool isSynced()
 {
+    if (time_synced_prev != time_synced && time_synced)
+    {
+        ESP_LOGI(TAG, "Time synced, marking app as valid");
+        esp_ota_mark_app_valid_cancel_rollback();
+        time_synced_prev = time_synced;
+    }
+
     return time_synced;
 }
 

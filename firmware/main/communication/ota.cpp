@@ -28,7 +28,7 @@ std::optional<esp_app_desc_t> otherAppDesc;
 
 void begin()
 {
-    asyncOta.construct("asyncOtaTask", 8192u, espcpputils::CoreAffinity::Core0);
+    asyncOta.construct("asyncOtaTask", 8192u, espcpputils::CoreAffinity::Both);
 
     if (const auto res = readAppInfo(); !res)
         ESP_LOGE(TAG, "Failed to read app info: %s", res.error().c_str());
@@ -51,7 +51,7 @@ std::expected<void, std::string> trigger(std::string_view url)
 
     espcpputils::RecursiveLockHelper lockHelper{global::global_lock->handle};
 
-    return asyncOta->trigger(url, {}, {}, {}, {});
+    return asyncOta->trigger(url, {}, true, {}, {});
 }
 
 std::expected<void, std::string> switchAppPartition()
