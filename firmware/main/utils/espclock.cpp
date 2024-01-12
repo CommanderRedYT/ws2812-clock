@@ -12,6 +12,7 @@ constexpr const char * const TAG = "espclock";
 #include <sunset.h>
 
 // local includes
+#include "peripheral/ledhelpers/ledanimation.h"
 #include "peripheral/ledmanager.h"
 #include "utils/config.h"
 
@@ -119,10 +120,13 @@ void setTimeInLedManager()
         // 0 1 2 3
         // h h m m
 
-        ledManager.digits[0].setChar('0' + hour / 10);
-        ledManager.digits[1].setChar('0' + hour % 10);
-        ledManager.digits[2].setChar('0' + minute / 10);
-        ledManager.digits[3].setChar('0' + minute % 10);
+        if (const auto animation = animation::currentAnimation; animation && animation->shouldSetDigits())
+        {
+            ledManager.digits[0].setDigit(hour / 10);
+            ledManager.digits[1].setDigit(hour % 10);
+            ledManager.digits[2].setDigit(minute / 10);
+            ledManager.digits[3].setDigit(minute % 10);
+        }
     }
 }
 
