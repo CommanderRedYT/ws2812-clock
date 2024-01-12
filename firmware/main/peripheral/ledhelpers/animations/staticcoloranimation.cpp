@@ -5,33 +5,28 @@
 
 namespace animation {
 
-void StaticColorAnimation::render_segment(SevenSegmentDigit::Segment segment, SevenSegmentDigit& sevenSegmentDigit, CRGB* start_led, CRGB* end_led, size_t length)
+void StaticColorAnimation::render_all(CRGB* leds, size_t length)
 {
-    Base::render_segment(segment, sevenSegmentDigit, start_led, end_led, length);
+    Base::render_all(leds, length);
 
-    auto& primaryColor = configs.primaryColor.value();
-    auto* startLed = sevenSegmentDigit.begin();
-    auto* endLed = sevenSegmentDigit.end();
-    fill_solid(startLed, std::distance(startLed, endLed), CRGB(primaryColor.r, primaryColor.g, primaryColor.b));
+    const auto& primaryColor = configs.primaryColor.value();
+    const auto color = CRGB(primaryColor.r, primaryColor.g, primaryColor.b);
+    std::fill(leds, leds + length, color);
 }
 
 void StaticColorAnimation::render_dot(ClockDot& clockDot, CRGB* leds, size_t leds_length)
 {
     Base::render_dot(clockDot, leds, leds_length);
 
-    auto& secondaryColor = configs.secondaryColor.value();
-    auto& tertiaryColor = configs.tertiaryColor.value();
-    auto* startLed = clockDot.begin();
-    size_t length = clockDot.length();
-    bool on = clockDot.on();
+    const auto& secondaryColor = configs.secondaryColor.value();
+    const auto& tertiaryColor = configs.tertiaryColor.value();
 
-    fill_solid(
-           startLed,
-           length,
-           on ?
-            CRGB(secondaryColor.r, secondaryColor.g, secondaryColor.b) :
-            CRGB(tertiaryColor.r, tertiaryColor.g, tertiaryColor.b)
-    );
+    auto* startLed = clockDot.begin();
+    const size_t length = clockDot.length();
+
+    const bool on = clockDot.on();
+
+    std::fill(startLed, startLed + length, on ? CRGB(secondaryColor.r, secondaryColor.g, secondaryColor.b) : CRGB(tertiaryColor.r, tertiaryColor.g, tertiaryColor.b));
 }
 
 } // namespace animation
