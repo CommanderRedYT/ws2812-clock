@@ -11,7 +11,7 @@ class OtaAnimation : public LedAnimation
 
     void update() override;
 
-    espchrono::milliseconds32 getUpdateInterval() const override { return espchrono::milliseconds32{50}; }
+    espchrono::milliseconds32 getUpdateInterval() const override { return espchrono::milliseconds32{16}; }
 
     constexpr RenderType renderType() const override { return RenderType::ForEveryDigit; }
 
