@@ -42,8 +42,10 @@ window.addEventListener('load', async () => {
         console.log('onStatusChange', response);
         const { status } = response;
 
-        document.title = status.name;
-        document.getElementById('deviceName').innerText = status.name;
+        if (status.name) {
+            document.title = status.name;
+            document.getElementById('deviceName').innerText = status.name;
+        }
 
         lastMessage = Date.now();
     });
