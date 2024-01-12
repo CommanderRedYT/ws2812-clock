@@ -204,6 +204,8 @@ std::string format_error(esp_mqtt_error_codes_t* error_handle)
                             const auto b = color["b"].as<uint8_t>();
 
                             configs.write_config(configs.primaryColor, cpputils::ColorHelper{r, g, b});
+                            configs.write_config(configs.secondaryColor, cpputils::ColorHelper{r, g, b});
+                            configs.write_config(configs.tertiaryColor, cpputils::ColorHelper{r, g, b});
                         }
                     }
 
