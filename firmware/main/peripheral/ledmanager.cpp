@@ -10,6 +10,7 @@ constexpr const char * const TAG = "ledmanager";
 
 // local includes
 #include "communication/ota.h"
+#include "peripheral/ledhelpers/animations/internal/otaanimation.h"
 #include "peripheral/ledhelpers/ledanimation.h"
 #include "utils/config.h"
 #include "utils/espclock.h"
@@ -105,7 +106,7 @@ bool isInSecondaryBrightnessTimeRange()
 
 void LedManager::handleVoltageAndCurrent()
 {
-    const auto now = espchrono::millis_clock::now();
+    // const auto now = espchrono::millis_clock::now();
     const auto brightness = configs.ledBrightness.value();
     const auto secondaryBrightness = configs.ledSecondaryBrightness.value();
     const auto inSecondaryBrightnessTimeRange = isInSecondaryBrightnessTimeRange();
@@ -171,8 +172,10 @@ void update()
 {
     espcpputils::RecursiveLockHelper guard{led_lock->handle};
 
+    /*
     if (ota::isInProgress()) // Prevent guru meditation error because of rmt inline not in IRAM
         return;
+    */
 
     if (ledManager.constructed())
     {
@@ -199,24 +202,40 @@ void LedManager::render()
     {
         ESP_LOGE(TAG, "Failed to update animation: %.*s\n", res.error().size(), res.error().data());
     }
-    else if (auto animation = animation::currentAnimation; animation)
+    else if (const auto currentAnimation = animation::currentAnimation; currentAnimation)
     {
-        if (animation->needsUpdate())
+        if (currentAnimation->needsUpdate())
         {
-            for (auto &digit: digits)
+            switch (currentAnimation->renderType())
             {
-                animation->update();
-                if (animation->rendersOnce())
-                {
-                    animation->render_all(leds.begin(), leds.size());
+                case animation::ForEverySegment: {
+                    for (auto &digit: digits)
+                    {
+                        currentAnimation->update();
+                        digit.forEverySegment([&](SevenSegmentDigit::Segment segment, CRGB *startLed, CRGB *endLed,
+                                                  size_t length) {
+                            currentAnimation->render_segment(segment, digit, startLed, endLed, length);
+                        });
+                    }
+                    break;
                 }
-                digit.forEverySegment([&](SevenSegmentDigit::Segment segment, CRGB *startLed, CRGB *endLed) {
-                    animation->render_segment(segment, digit, startLed, digits.size());
-                });
-            }
+                case animation::AllAtOnce: {
+                    currentAnimation->update();
+                    currentAnimation->render_all(leds.begin(), leds.size());
+                    break;
+                }
+                case animation::ForEveryDigit: {
+                    currentAnimation->update();
+                    for (auto &digit: digits)
+                    {
+                        currentAnimation->render_digit(digit, &digit - &digits[0], leds.begin(), leds.size());
+                    }
+                    break;
+                }
+                }
 
-            animation->render_dot(upper, leds.begin(), leds.size());
-            animation->render_dot(lower, leds.begin(), leds.size());
+            currentAnimation->render_dot(upper, leds.begin(), leds.size());
+            currentAnimation->render_dot(lower, leds.begin(), leds.size());
         }
     }
 

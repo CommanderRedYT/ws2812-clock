@@ -222,7 +222,7 @@ public:
         const char* nvsName() const final { return "customName"; }
         std::string defaultValue() const final { return defaultHostname(); }
         ConfigConstraintReturnType checkValue(value_t value) const final { return StringMaxSize<32>(value); }
-    } name;
+    } customName;
 
     struct : ConfigWrapper<std::optional<mac_t>>
     {
@@ -407,7 +407,7 @@ public:
     {
         bool allowReset() const final { return true; }
         const char *nvsName() const final { return "mqttEnabled"; }
-        value_t defaultValue() const final { return true; }
+        value_t defaultValue() const final { return false; }
         ConfigConstraintReturnType checkValue(value_t value) const final { return {}; }
     } mqttEnabled;
     struct : ConfigWrapper<std::string>
@@ -452,7 +452,7 @@ public:
     {
         bool allowReset() const final { return true; }
         const char *nvsName() const final { return "ledAnimation"; }
-        value_t defaultValue() const final { return animation::getFirstAnimation().getEnumValue(); }
+        value_t defaultValue() const final { return animation::getFirstAnimation().getEnumValue().value_or(LedAnimationName::Rainbow); }
         ConfigConstraintReturnType checkValue(value_t value) const final
         {
             if (!animation::animationExists(value))
@@ -530,7 +530,7 @@ public:
 
         // Connectivity
         ITER_CONFIG(hostname)
-        ITER_CONFIG(name)
+        ITER_CONFIG(customName)
         ITER_CONFIG(baseMacAddressOverride)
         ITER_CONFIG(wifiStaEnabled)
 

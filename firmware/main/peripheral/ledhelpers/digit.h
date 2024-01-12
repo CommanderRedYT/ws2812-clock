@@ -55,7 +55,7 @@ public:
         ALL_SEGMENTS = -1,
     };
 
-    void forEverySegment(const std::function<void(Segment, CRGB*, CRGB*)>& func) const;
+    void forEverySegment(const std::function<void(Segment, CRGB*, CRGB*, size_t)>& func) const;
 
     size_t length() const { return m_length; }
 

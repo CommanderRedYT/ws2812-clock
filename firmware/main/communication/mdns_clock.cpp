@@ -41,7 +41,7 @@ void begin()
         return;
     }
 
-    const auto& name = configs.name.value();
+    const auto& name = configs.customName.value();
     if (const auto res = mdns_instance_name_set(name.c_str()); res != ESP_OK)
     {
         ESP_LOGE(TAG, "mdns_instance_name_set() \"%.*s\" failed with: %s", name.size(), name.data(), esp_err_to_name(res));
@@ -89,7 +89,7 @@ void update()
         lastHostname = currentHostname;
     }
 
-    if (const auto& currentName = configs.name.value(); lastName != currentName)
+    if (const auto& currentName = configs.customName.value(); lastName != currentName)
     {
         if (const auto res = mdns_instance_name_set(currentName.c_str()); res != ESP_OK)
         {

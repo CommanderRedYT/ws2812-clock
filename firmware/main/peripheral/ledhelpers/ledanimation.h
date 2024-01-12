@@ -22,6 +22,12 @@ DECLARE_GLOBAL_TYPESAFE_ENUM(LedAnimationName, : uint8_t, LedAnimationNameValues
 
 namespace animation {
 
+enum RenderType {
+    AllAtOnce,
+    ForEveryDigit,
+    ForEverySegment,
+};
+
 class LedAnimation
 {
 public:
@@ -45,7 +51,12 @@ public:
         m_lastUpdate = espchrono::millis_clock::now();
     }
 
-    virtual void render_segment(SevenSegmentDigit::Segment segment, SevenSegmentDigit& sevenSegmentDigit, CRGB* leds, size_t leds_length)
+    virtual void render_segment(SevenSegmentDigit::Segment segment, SevenSegmentDigit& sevenSegmentDigit, CRGB* start_led, CRGB* end_led, size_t length)
+    {
+        m_lastRender = espchrono::millis_clock::now();
+    }
+
+    virtual void render_digit(SevenSegmentDigit& sevenSegmentDigit, size_t digit_idx, CRGB* leds, size_t leds_length)
     {
         m_lastRender = espchrono::millis_clock::now();
     }
@@ -60,13 +71,15 @@ public:
         m_lastRender = espchrono::millis_clock::now();
     }
 
-    virtual LedAnimationName getEnumValue() const = 0;
+    virtual std::optional<LedAnimationName> getEnumValue() const { return std::nullopt; };
 
     virtual espchrono::milliseconds32 getUpdateInterval() const = 0;
 
     virtual cpputils::ColorHelper getPrimaryColor() const { return cpputils::ColorHelper{0, 0, 0}; }
 
-    virtual constexpr bool rendersOnce() const { return false; }
+    virtual constexpr RenderType renderType() const { return RenderType::AllAtOnce; }
+
+    virtual constexpr bool shouldSetDigits() const { return true; }
 
     bool needsUpdate() const;
 
