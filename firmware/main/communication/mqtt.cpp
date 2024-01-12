@@ -254,6 +254,19 @@ void publishHomeassistantDiscovery()
 
     const long long expireAfter = configs.mqttPublishInterval.value() / 1s + 5;
 
+    auto fillCommonStuff = [&](JsonDocument& doc) {
+        doc["device"]["identifiers"][0] = configs.hostname.value();
+        doc["device"]["name"] = configs.customName.value();
+        doc["device"]["manufacturer"] = "ws2812-clock";
+        doc["device"]["model"] = "ws2812-clock-BME280";
+        doc["device"]["sw_version"] = VERSION;
+        if (configurationUrl)
+        {
+            doc["device"]["configuration_url"] = *configurationUrl;
+        }
+        doc["expire_after"] = expireAfter;
+    };
+
 #ifdef HARDWARE_USE_BME280
     // {mqttTopic}/{hostname}/status/bme280/temp: 25 (°C)
     // {mqttTopic}/{hostname}/status/bme280/pressure (hPa)
@@ -269,17 +282,8 @@ void publishHomeassistantDiscovery()
         doc["value_template"] = "{{ value_json }}";
         doc["state_class"] = "measurement";
         doc["device_class"] = "temperature";
-        doc["device"]["identifiers"][0] = configs.hostname.value();
-        doc["device"]["name"] = configs.name.value();
-        doc["device"]["manufacturer"] = "ws2812-clock";
-        doc["device"]["model"] = "ws2812-clock-BME280";
-        doc["device"]["sw_version"] = VERSION;
-        if (configurationUrl)
-        {
-            doc["device"]["configuration_url"] = *configurationUrl;
-        }
         doc["unique_id"] = fmt::format("{}_bme280_temp", configs.hostname.value());
-        doc["expire_after"] = expireAfter;
+        fillCommonStuff(doc);
 
         std::string payload;
         serializeJson(doc, payload);
@@ -300,17 +304,8 @@ void publishHomeassistantDiscovery()
         doc["value_template"] = "{{ value_json }}";
         doc["state_class"] = "measurement";
         doc["device_class"] = "atmospheric_pressure";
-        doc["device"]["identifiers"][0] = configs.hostname.value();
-        doc["device"]["name"] = configs.name.value();
-        doc["device"]["manufacturer"] = "ws2812-clock";
-        doc["device"]["model"] = "ws2812-clock-BME280";
-        doc["device"]["sw_version"] = VERSION;
-        if (configurationUrl)
-        {
-            doc["device"]["configuration_url"] = *configurationUrl;
-        }
         doc["unique_id"] = fmt::format("{}_bme280_pressure", configs.hostname.value());
-        doc["expire_after"] = expireAfter;
+        fillCommonStuff(doc);
 
         std::string payload;
         serializeJson(doc, payload);
@@ -331,17 +326,8 @@ void publishHomeassistantDiscovery()
         doc["value_template"] = "{{ value_json }}";
         doc["state_class"] = "measurement";
         doc["device_class"] = "humidity";
-        doc["device"]["identifiers"][0] = configs.hostname.value();
-        doc["device"]["name"] = configs.name.value();
-        doc["device"]["manufacturer"] = "ws2812-clock";
-        doc["device"]["model"] = "ws2812-clock-BME280";
-        doc["device"]["sw_version"] = VERSION;
-        if (configurationUrl)
-        {
-            doc["device"]["configuration_url"] = *configurationUrl;
-        }
         doc["unique_id"] = fmt::format("{}_bme280_humidity", configs.hostname.value());
-        doc["expire_after"] = expireAfter;
+        fillCommonStuff(doc);
 
         std::string payload;
         serializeJson(doc, payload);
@@ -368,17 +354,8 @@ void publishHomeassistantDiscovery()
         doc["value_template"] = "{{ value_json }}";
         doc["state_class"] = "measurement";
         doc["device_class"] = "signal_strength";
-        doc["device"]["identifiers"][0] = configs.hostname.value();
-        doc["device"]["name"] = configs.name.value();
-        doc["device"]["manufacturer"] = "ws2812-clock";
-        doc["device"]["model"] = "ws2812-clock";
-        doc["device"]["sw_version"] = VERSION;
-        if (configurationUrl)
-        {
-            doc["device"]["configuration_url"] = *configurationUrl;
-        }
         doc["unique_id"] = fmt::format("{}_wifi_rssi", configs.hostname.value());
-        doc["expire_after"] = expireAfter;
+        fillCommonStuff(doc);
 
         std::string payload;
         serializeJson(doc, payload);
@@ -396,17 +373,8 @@ void publishHomeassistantDiscovery()
         doc["payload_available"] = "true";
         doc["payload_not_available"] = "false";
         doc["value_template"] = "{{ value_json }}";
-        doc["device"]["identifiers"][0] = configs.hostname.value();
-        doc["device"]["name"] = configs.name.value();
-        doc["device"]["manufacturer"] = "ws2812-clock";
-        doc["device"]["model"] = "ws2812-clock";
-        doc["device"]["sw_version"] = VERSION;
-        if (configurationUrl)
-        {
-            doc["device"]["configuration_url"] = *configurationUrl;
-        }
         doc["unique_id"] = fmt::format("{}_wifi_ssid", configs.hostname.value());
-        doc["expire_after"] = expireAfter;
+        fillCommonStuff(doc);
 
         std::string payload;
         serializeJson(doc, payload);
@@ -424,17 +392,8 @@ void publishHomeassistantDiscovery()
         doc["payload_available"] = "true";
         doc["payload_not_available"] = "false";
         doc["value_template"] = "{{ value_json }}";
-        doc["device"]["identifiers"][0] = configs.hostname.value();
-        doc["device"]["name"] = configs.name.value();
-        doc["device"]["manufacturer"] = "ws2812-clock";
-        doc["device"]["model"] = "ws2812-clock";
-        doc["device"]["sw_version"] = VERSION;
-        if (configurationUrl)
-        {
-            doc["device"]["configuration_url"] = *configurationUrl;
-        }
         doc["unique_id"] = fmt::format("{}_wifi_bssid", configs.hostname.value());
-        doc["expire_after"] = expireAfter;
+        fillCommonStuff(doc);
 
         std::string payload;
         serializeJson(doc, payload);
@@ -452,17 +411,8 @@ void publishHomeassistantDiscovery()
         doc["payload_available"] = "true";
         doc["payload_not_available"] = "false";
         doc["value_template"] = "{{ value_json }}";
-        doc["device"]["identifiers"][0] = configs.hostname.value();
-        doc["device"]["name"] = configs.name.value();
-        doc["device"]["manufacturer"] = "ws2812-clock";
-        doc["device"]["model"] = "ws2812-clock";
-        doc["device"]["sw_version"] = VERSION;
-        if (configurationUrl)
-        {
-            doc["device"]["configuration_url"] = *configurationUrl;
-        }
         doc["unique_id"] = fmt::format("{}_wifi_ip", configs.hostname.value());
-        doc["expire_after"] = expireAfter;
+        fillCommonStuff(doc);
 
         std::string payload;
         serializeJson(doc, payload);
@@ -485,17 +435,8 @@ void publishHomeassistantDiscovery()
         doc["value_template"] = "{{ value_json }}";
         doc["state_class"] = "measurement";
         doc["device_class"] = "timestamp";
-        doc["device"]["identifiers"][0] = configs.hostname.value();
-        doc["device"]["name"] = configs.name.value();
-        doc["device"]["manufacturer"] = "ws2812-clock";
-        doc["device"]["model"] = "ws2812-clock";
-        doc["device"]["sw_version"] = VERSION;
-        if (configurationUrl)
-        {
-            doc["device"]["configuration_url"] = *configurationUrl;
-        }
         doc["unique_id"] = fmt::format("{}_uptime", configs.hostname.value());
-        doc["expire_after"] = expireAfter;
+        fillCommonStuff(doc);
 
         std::string payload;
         serializeJson(doc, payload);
@@ -525,18 +466,8 @@ void publishHomeassistantDiscovery()
         }
 
         doc["schema"] = "json";
-
-        doc["device"]["identifiers"][0] = configs.hostname.value();
-        doc["device"]["name"] = configs.name.value();
-        doc["device"]["manufacturer"] = "ws2812-clock";
-        doc["device"]["model"] = "ws2812-clock";
-        doc["device"]["sw_version"] = VERSION;
-        if (configurationUrl)
-        {
-            doc["device"]["configuration_url"] = *configurationUrl;
-        }
         doc["unique_id"] = fmt::format("{}_light", configs.hostname.value());
-        doc["expire_after"] = expireAfter;
+        fillCommonStuff(doc);
 
         std::string payload;
         serializeJson(doc, payload);

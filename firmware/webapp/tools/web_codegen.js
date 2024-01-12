@@ -100,13 +100,14 @@ async function main() {
     let handlerList = TEMPLATE_H_FILE_REGISTER_WEBAPP_START;
 
     const compile = async (srcFile) => {
-        console.log(`Compiling ${srcFile}`);
         let overrideName = null;
 
         if (Array.isArray(srcFile)) {
             overrideName = srcFile[1];
             srcFile = srcFile[0];
         }
+
+        console.log(`Compiling ${overrideName ?? srcFile}`);
 
         // check if file is empty
         if ((await fs.promises.readFile(srcFile, 'utf8')) === '') {

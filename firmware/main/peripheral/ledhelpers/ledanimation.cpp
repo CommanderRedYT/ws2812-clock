@@ -6,17 +6,21 @@ constexpr const char * const TAG = "ledanimation";
 #include "arrayview.h"
 
 // local includes
+#include "communication/ota.h"
+#include "peripheral/ledhelpers/animations/internal/otaanimation.h"
 #include "utils/config.h"
 
 // animations
 #include "peripheral/ledhelpers/animations/rainbowanimation.h"
 #include "peripheral/ledhelpers/animations/staticcoloranimation.h"
+#include "peripheral/ledhelpers/animations/newyearanimation.h"
 
 namespace animation {
 
 LedAnimation* animationsArr[]{
     new RainbowAnimation(),
     new StaticColorAnimation(),
+    new NewYearAnimation(),
 };
 
 cpputils::ArrayView<LedAnimation*> animations{animationsArr};
@@ -30,20 +34,38 @@ const LedAnimation& getFirstAnimation()
 
 std::expected<void, std::string> updateAnimation(LedAnimationName enumValue, ledmanager::LedArray& leds)
 {
-    if (currentAnimation != nullptr && currentAnimation->getEnumValue() == enumValue)
+    LedAnimation* newAnimation{nullptr};
+
+    if (currentAnimation != nullptr && currentAnimation->getEnumValue() == enumValue && !ota::isInProgress())
         return {};
 
-    for (auto animation : animations)
+    if (ota::isInProgress())
     {
-        if (animation->getEnumValue() == enumValue)
+        newAnimation = internal::otaAnimation;
+    }
+    else
+    {
+        for (auto animation: animations)
         {
-            if (currentAnimation)
-                // void stop(CRGB* startLed, CRGB* endLed)
-                currentAnimation->stop(leds.data(), leds.size());
-            currentAnimation = animation;
-            currentAnimation->start(leds.data(), leds.size());
-            return {};
+            if (animation->getEnumValue() == enumValue)
+            {
+                newAnimation = animation;
+                break;
+            }
         }
+    }
+
+
+    if (newAnimation != nullptr)
+    {
+        if (currentAnimation)
+        {
+            // void stop(CRGB* startLed, CRGB* endLed)
+            currentAnimation->stop(leds.data(), leds.size());
+        }
+        currentAnimation = newAnimation;
+        currentAnimation->start(leds.data(), leds.size());
+        return {};
     }
 
     return std::unexpected(fmt::format("Animation '{}' not found ({})", toString(enumValue), std::to_underlying(enumValue)));

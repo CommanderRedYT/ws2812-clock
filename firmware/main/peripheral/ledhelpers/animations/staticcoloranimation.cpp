@@ -5,9 +5,9 @@
 
 namespace animation {
 
-void StaticColorAnimation::render_segment(SevenSegmentDigit::Segment segment, SevenSegmentDigit& sevenSegmentDigit, CRGB* leds, size_t leds_length)
+void StaticColorAnimation::render_segment(SevenSegmentDigit::Segment segment, SevenSegmentDigit& sevenSegmentDigit, CRGB* start_led, CRGB* end_led, size_t length)
 {
-    Base::render_segment(segment, sevenSegmentDigit, leds, leds_length);
+    Base::render_segment(segment, sevenSegmentDigit, start_led, end_led, length);
 
     auto& primaryColor = configs.primaryColor.value();
     auto* startLed = sevenSegmentDigit.begin();

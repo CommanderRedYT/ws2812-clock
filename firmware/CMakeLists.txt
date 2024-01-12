@@ -17,6 +17,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # add_definitions(-DASIO_DISABLE_CONCEPTS=1)
 
+add_definitions(-DFASTLED_ESP32_FLASH_LOCK=1)
+
 set(EXTRA_COMPONENT_DIRS
     esp-protocols/components
 )

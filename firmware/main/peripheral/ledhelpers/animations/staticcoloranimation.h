@@ -11,15 +11,15 @@ class StaticColorAnimation : public LedAnimation
 
     espchrono::milliseconds32 getUpdateInterval() const override { return espchrono::milliseconds32{0}; }
 
-    constexpr bool rendersOnce() const override { return true; }
+    constexpr RenderType renderType() const override { return RenderType::AllAtOnce; }
 
-    cpputils::ColorHelper getPrimaryColor() const { return cpputils::ColorHelper{0, 0, 0}; }
+    cpputils::ColorHelper getPrimaryColor() const override { return cpputils::ColorHelper{0, 0, 0}; }
 
-    void render_segment(SevenSegmentDigit::Segment segment, SevenSegmentDigit& sevenSegmentDigit, CRGB* leds, size_t leds_length) override;
+    void render_segment(SevenSegmentDigit::Segment segment, SevenSegmentDigit& sevenSegmentDigit, CRGB* start_led, CRGB* end_led, size_t length) override;
 
     void render_dot(ClockDot& clockDot, CRGB* leds, size_t leds_length) override;
 
-    LedAnimationName getEnumValue() const override { return LedAnimationName::StaticColor; }
+    std::optional<LedAnimationName> getEnumValue() const override { return LedAnimationName::StaticColor; }
 };
 
 } // namespace animation

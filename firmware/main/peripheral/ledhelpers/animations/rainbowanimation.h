@@ -11,13 +11,13 @@ class RainbowAnimation : public LedAnimation
 
     espchrono::milliseconds32 getUpdateInterval() const override { return espchrono::milliseconds32{5}; }
 
-    constexpr bool rendersOnce() const override { return true; }
+    constexpr RenderType renderType() const override { return RenderType::AllAtOnce; }
 
     void update() override;
 
     void render_all(CRGB* leds, size_t leds_length) override;
 
-    LedAnimationName getEnumValue() const override { return LedAnimationName::Rainbow; }
+    std::optional<LedAnimationName> getEnumValue() const override { return LedAnimationName::Rainbow; }
 
 private:
     uint8_t m_hue{0};

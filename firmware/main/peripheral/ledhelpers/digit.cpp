@@ -68,7 +68,7 @@ std::string SevenSegmentDigit::toString() const
     return fmt::format("SevenSegmentDigit(digit={})", c);
 }
 
-void SevenSegmentDigit::forEverySegment(const std::function<void(Segment, CRGB*, CRGB*)>& func) const
+void SevenSegmentDigit::forEverySegment(const std::function<void(Segment, CRGB*, CRGB*, size_t)>& func) const
 {
     for (auto segment = Segment(0); segment <= LAST_SEGMENT; segment = Segment(segment + 1))
     {
@@ -77,7 +77,8 @@ void SevenSegmentDigit::forEverySegment(const std::function<void(Segment, CRGB*,
 
         CRGB* startLed = m_startLed + start;
         CRGB* endLed = m_startLed + end;
+        size_t length = end - start;
 
-        func(segment, startLed, endLed);
+        func(segment, startLed, endLed, length);
     }
 }

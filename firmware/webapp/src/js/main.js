@@ -38,8 +38,12 @@ window.addEventListener('load', async () => {
     const isDev = window.location.hostname === 'localhost';
     window.clockApi = new ClockApi(isDev);
 
-    window.clockApi.on('onStatusChange', status => {
-        console.log('onStatusChange', status);
+    window.clockApi.on('onStatusChange', response => {
+        console.log('onStatusChange', response);
+        const { status } = response;
+
+        document.title = status.name;
+        document.getElementById('deviceName').innerText = status.name;
 
         lastMessage = Date.now();
     });

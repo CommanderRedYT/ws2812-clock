@@ -29,6 +29,10 @@ esp_err_t generateStatusJson(JsonObject& statusObj)
     statusObj["version"] = VERSION;
 
     {
+        statusObj["name"] = configs.customName.value();
+    }
+
+    {
         auto timeObj = statusObj.createNestedObject("time");
 
         timeObj["millis"] = espchrono::millis_clock::now().time_since_epoch() / 1ms;
@@ -64,7 +68,10 @@ esp_err_t generateStatusJson(JsonObject& statusObj)
             ledObj["brightness"] = ledManager->getBrightness();
             ledObj["visible"] = ledManager->isVisible();
             if (animation::currentAnimation)
-                ledObj["animation"] = toString(animation::currentAnimation->getEnumValue());
+                if (auto enumValue = animation::currentAnimation->getEnumValue(); enumValue)
+                    ledObj["animation"] = toString(*enumValue);
+                else
+                    ledObj["animation"] = nullptr;
             else
                 ledObj["animation"] = nullptr;
 
@@ -72,9 +79,12 @@ esp_err_t generateStatusJson(JsonObject& statusObj)
             hassObj["brightness"] = configs.ledBrightness.value();
             hassObj["state"] = configs.ledAnimationEnabled.value() ? "ON" : "OFF";
             if (animation::currentAnimation)
-                hassObj["effect"] = toString(animation::currentAnimation->getEnumValue());
+                if (auto enumValue = animation::currentAnimation->getEnumValue(); enumValue)
+                    ledObj["effect"] = toString(*enumValue);
+                else
+                    ledObj["effect"] = nullptr;
             else
-                hassObj["effect"] = nullptr;
+                ledObj["effect"] = nullptr;
 
             auto &primaryColor = configs.primaryColor.value();
             JsonObject colorObj = hassObj.createNestedObject("color");
