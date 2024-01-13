@@ -102,6 +102,34 @@ bool isInSecondaryBrightnessTimeRange()
     return false;
 }
 
+bool barrel_jack_connected()
+{
+    // floating when not connected, pull down when connected
+    static bool gpio_initialized = false;
+
+    auto barrel_jack = static_cast<gpio_num_t>(HARDWARE_BARREL_JACK_PIN);
+
+    if (!gpio_initialized)
+    {
+        // TODO: Test if this actually works
+        gpio_config_t io_conf;
+        io_conf.intr_type = GPIO_INTR_DISABLE;
+        io_conf.mode = GPIO_MODE_INPUT;
+        io_conf.pin_bit_mask = 1ULL << HARDWARE_BARREL_JACK_PIN;
+        io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
+        io_conf.pull_up_en = GPIO_PULLUP_ENABLE;
+        if (const auto res = gpio_config(&io_conf); res != ESP_OK)
+        {
+            ESP_LOGE(TAG, "Failed to configure GPIO: %d", res);
+            return false;
+        }
+
+        gpio_initialized = true;
+    }
+
+    return gpio_get_level(barrel_jack) == 0;
+}
+
 } // namespace
 
 void LedManager::handleVoltageAndCurrent()
@@ -119,16 +147,16 @@ void LedManager::handleVoltageAndCurrent()
     m_brightness = m_brightness * fadeFactor + brightnessTarget * (1.0f - fadeFactor);
     FastLED.setBrightness(m_brightness);
 
-    if (/*barrel_jack_connected*/false)
+    if (barrel_jack_connected())
     {
         // increase current
         // 5V, 8A
-        FastLED.setMaxPowerInVoltsAndMilliamps(5, 8000);
+        FastLED.setMaxPowerInVoltsAndMilliamps(5, configs.ledMilliAmpereBarrelJack.value());
     }
     else
     {
         // 5V, 3A
-        FastLED.setMaxPowerInVoltsAndMilliamps(5, 3000);
+        FastLED.setMaxPowerInVoltsAndMilliamps(5, configs.ledMilliAmpereUsbC.value());
     }
 }
 
