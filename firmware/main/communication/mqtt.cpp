@@ -431,12 +431,10 @@ void publishHomeassistantDiscovery()
         doc["name"] = "Uptime";
         doc["state_topic"] = fmt::format("{}/{}/status/time/millis", configs.mqttTopic.value(), configs.hostname.value());
         doc["availability_topic"] = fmt::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
-        doc["payload_available"] = "true";
-        doc["payload_not_available"] = "false";
         doc["unit_of_measurement"] = "ms";
         doc["value_template"] = "{{ value_json }}";
-        doc["state_class"] = "measurement";
-        doc["device_class"] = "timestamp";
+        doc["entity_class"] = "diagnostic";
+        doc["device_class"] = "duration";
         doc["unique_id"] = fmt::format("{}_uptime", configs.hostname.value());
         fillCommonStuff(doc);
 
