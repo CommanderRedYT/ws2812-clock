@@ -339,6 +339,20 @@ public:
             return {};
         }
     } basicLedBrightness;
+    struct : ConfigWrapper<uint32_t>
+    {
+        bool allowReset() const final { return true; }
+        const char* nvsName() const final { return "milliAmpUsbC"; }
+        value_t defaultValue() const final { return 3000; }
+        ConfigConstraintReturnType checkValue(value_t value) const final { return {}; }
+    } ledMilliAmpereUsbC;
+    struct : ConfigWrapper<uint32_t>
+    {
+        bool allowReset() const final { return true; }
+        const char* nvsName() const final { return "milliAmpBarrel"; }
+        value_t defaultValue() const final { return 5000; }
+        ConfigConstraintReturnType checkValue(value_t value) const final { return {}; }
+    } ledMilliAmpereBarrelJack;
 
     // Time
     struct : ConfigWrapper<minutes32>
@@ -561,6 +575,8 @@ public:
         ITER_CONFIG(ledBrightness)
         ITER_CONFIG(ledSecondaryBrightness)
         ITER_CONFIG(basicLedBrightness)
+        ITER_CONFIG(ledMilliAmpereUsbC)
+        ITER_CONFIG(ledMilliAmpereBarrelJack)
 
         // Time
         ITER_CONFIG(timeOffset)
