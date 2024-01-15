@@ -284,7 +284,7 @@ public:
     {
         bool allowReset() const final { return true; }
         const char *nvsName() const final { return "wifiApIp"; }
-        value_t defaultValue() const final { return wifi_stack::ip_address_t{4, 3, 2, 1}; }
+        value_t defaultValue() const final { return wifi_stack::ip_address_t{10, 0, 0, 1}; }
         ConfigConstraintReturnType checkValue(value_t value) const final { return {}; }
     } wifiApIp;
 
