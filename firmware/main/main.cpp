@@ -52,20 +52,16 @@ extern "C" [[noreturn]] void app_main()
 
     /*--- Settings ---*/
     if (const auto result = configs.init("ws2812-clock"); result != ESP_OK)
+    {
         ESP_LOGE(TAG, "config_init_settings() failed with %s", esp_err_to_name(result));
+
+        while (true)
+        {
+            vTaskDelay(1000);
+        }
+    }
     else
         ESP_LOGI(TAG, "config_init_settings() succeeded");
-
-    configs.callForEveryConfig([&](auto& config) {
-        if (strlen(config.nvsName()) > 15)
-        {
-            ESP_LOGW(TAG, "config key '%s' is longer than 15 characters", config.nvsName());
-            while (true)
-                vTaskDelay(1000);
-        }
-
-        return false;
-    });
 
 
     /*--- Global Lock ---*/
