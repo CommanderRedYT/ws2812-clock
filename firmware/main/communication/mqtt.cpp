@@ -254,7 +254,7 @@ void publishHomeassistantDiscovery()
         return std::nullopt;
     }();
 
-    const long long expireAfter = configs.mqttPublishInterval.value() / 1s + 5;
+    // const long long expireAfter = configs.mqttPublishInterval.value() / 1s + 5;
 
     auto fillCommonStuff = [&](JsonDocument& doc) {
         doc["device"]["identifiers"][0] = configs.hostname.value();
@@ -266,7 +266,7 @@ void publishHomeassistantDiscovery()
         {
             doc["device"]["configuration_url"] = *configurationUrl;
         }
-        doc["expire_after"] = expireAfter;
+        // doc["expire_after"] = expireAfter;
     };
 
 #ifdef HARDWARE_USE_BME280
