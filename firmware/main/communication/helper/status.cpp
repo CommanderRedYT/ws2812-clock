@@ -80,11 +80,11 @@ esp_err_t generateStatusJson(JsonObject& statusObj)
             hassObj["state"] = configs.ledAnimationEnabled.value() ? "ON" : "OFF";
             if (animation::currentAnimation)
                 if (auto enumValue = animation::currentAnimation->getEnumValue(); enumValue)
-                    ledObj["effect"] = toString(*enumValue);
+                    hassObj["effect"] = toString(*enumValue);
                 else
-                    ledObj["effect"] = nullptr;
+                    hassObj["effect"] = nullptr;
             else
-                ledObj["effect"] = nullptr;
+                hassObj["effect"] = nullptr;
 
             auto &primaryColor = configs.primaryColor.value();
             JsonObject colorObj = hassObj.createNestedObject("color");
