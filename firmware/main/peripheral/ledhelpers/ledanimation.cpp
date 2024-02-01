@@ -14,6 +14,7 @@ constexpr const char * const TAG = "ledanimation";
 #include "peripheral/ledhelpers/animations/rainbowanimation.h"
 #include "peripheral/ledhelpers/animations/staticcoloranimation.h"
 #include "peripheral/ledhelpers/animations/newyearanimation.h"
+#include "peripheral/ledhelpers/animations/stroboanimation.h"
 
 namespace animation {
 
@@ -21,6 +22,7 @@ LedAnimation* animationsArr[]{
     new RainbowAnimation(),
     new StaticColorAnimation(),
     new NewYearAnimation(),
+    new StroboAnimation(),
 };
 
 cpputils::ArrayView<LedAnimation*> animations{animationsArr};

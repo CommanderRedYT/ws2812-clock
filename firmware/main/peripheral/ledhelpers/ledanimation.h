@@ -17,7 +17,8 @@
 #define LedAnimationNameValues(x) \
     x(Rainbow) \
     x(StaticColor) \
-    x(NewYearAnimation)
+    x(NewYearAnimation)           \
+    x(Strobo)
 DECLARE_GLOBAL_TYPESAFE_ENUM(LedAnimationName, : uint8_t, LedAnimationNameValues);
 
 namespace animation {
