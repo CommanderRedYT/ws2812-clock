@@ -109,7 +109,7 @@ std::string format_error(esp_mqtt_error_codes_t* error_handle)
                 continue;
             }
 
-            if (client.publish(std::get<0>(*entry), std::get<1>(*entry), 0, 1) < 0)
+            if (client.publish(std::get<0>(*entry), std::get<1>(*entry), 1, 1) < 0)
             {
                 ESP_LOGE(TAG, "mqtt_send_handle: publish failed");
                 publishQueue.clear();
@@ -262,6 +262,7 @@ void publishHomeassistantDiscovery()
         doc["device"]["manufacturer"] = "ws2812-clock";
         doc["device"]["model"] = "ws2812-clock-BME280";
         doc["device"]["sw_version"] = VERSION;
+        doc["qos"] = 1;
         if (configurationUrl)
         {
             doc["device"]["configuration_url"] = *configurationUrl;
