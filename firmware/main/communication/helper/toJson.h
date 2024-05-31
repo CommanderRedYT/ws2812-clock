@@ -148,4 +148,23 @@ toJson(const T& value, JsonDocument &doc)
     return {};
 }
 
+template<typename T>
+typename std::enable_if<
+        typeutils::is_optional_v<T> &&
+        !std::is_same_v<T, std::optional<wifi_stack::mac_t>>
+        , FromJsonReturnType>::type
+toJson(const T& value, JsonDocument &doc)
+{
+    if (value.has_value())
+    {
+        if (const auto res = toJson(value.value(), doc); !res)
+            return res;
+    }
+    else
+    {
+        doc.set(nullptr);
+    }
+    return {};
+}
+
 } // namespace webserver::apihelpers

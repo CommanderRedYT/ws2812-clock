@@ -50,6 +50,8 @@ public:
 
     bool isVisible() const { return m_visible && m_brightness > 0; }
 
+    void setText(std::string_view text);
+
 private:
 
     std::string toString() const;

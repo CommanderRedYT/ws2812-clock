@@ -19,14 +19,14 @@ jobs:
     name: Checkout
     steps:
       - name: Cache repository
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-repository
         with:
           path: repository
           key: ${{ runner.os }}-repository-${{ github.sha }}
 
       - name: Cache npm
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.npm
           key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
@@ -34,7 +34,7 @@ jobs:
             ${{ runner.os }}-npm-
 
       - name: Cache yarn
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cache/yarn
@@ -45,7 +45,7 @@ jobs:
             ${{ runner.os }}-yarn-
 
       - name: Set Node.js 18.x
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18.x
 
@@ -68,7 +68,7 @@ jobs:
       - checkout
     steps:
       - name: Cache repository
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-repository
         with:
           path: repository
@@ -84,7 +84,7 @@ jobs:
 
       - name: Cache .espressif
         id: cache-espressif
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.espressif
           key: ${{ runner.os }}-espressif-${{ steps.get-esp-idf-release.outputs.tag_name }}
@@ -105,7 +105,7 @@ jobs:
       - install-idf
     steps:
       - name: Cache repository
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-repository
         with:
           path: repository
@@ -121,7 +121,7 @@ jobs:
 
       - name: Cache .espressif
         id: cache-espressif
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.espressif
           key: ${{ runner.os }}-espressif-${{ steps.get-esp-idf-release.outputs.tag_name }}

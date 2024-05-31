@@ -108,7 +108,7 @@ void time_sync_notification_cb(struct timeval *tv)
 
 void setTimeInLedManager()
 {
-    if (ledmanager::ledManager)
+    if (ledmanager::ledManager && configs.ledOverrideDigits.value().empty())
     {
         auto& ledManager = *ledmanager::ledManager;
 

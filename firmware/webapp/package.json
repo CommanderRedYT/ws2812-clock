@@ -22,5 +22,6 @@
     "@types/mime-types": "^2.1.2",
     "@types/minify": "^9.1.2",
     "@types/node-gzip": "^1.1.1"
-  }
+  },
+  "packageManager": "yarn@1.22.1"
 }
