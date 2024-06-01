@@ -353,6 +353,13 @@ public:
         value_t defaultValue() const final { return 5000; }
         ConfigConstraintReturnType checkValue(value_t value) const final { return {}; }
     } ledMilliAmpereBarrelJack;
+    struct : ConfigWrapper<std::string>
+    {
+        bool allowReset() const final { return true; }
+        const char* nvsName() const final { return "overrideDigits"; }
+        std::string defaultValue() const final { return {}; }
+        ConfigConstraintReturnType checkValue(value_t value) const final { return {}; }
+    } ledOverrideDigits;
 
     // Time
     struct : ConfigWrapper<minutes32>
@@ -577,6 +584,7 @@ public:
         ITER_CONFIG(basicLedBrightness)
         ITER_CONFIG(ledMilliAmpereUsbC)
         ITER_CONFIG(ledMilliAmpereBarrelJack)
+        ITER_CONFIG(ledOverrideDigits)
 
         // Time
         ITER_CONFIG(timeOffset)

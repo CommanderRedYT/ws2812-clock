@@ -37,7 +37,7 @@ std::map<char, uint8_t> SEGMENT_MASKS = {
     {'K', E | F | G},
     {'L', D | E | F},
     {'M', A | C | E},
-    {'N', A | B | C | E | G},
+    {'N', C | E | G},
     {'O', A | B | C | D | E | F},
     {'P', A | B | E | F | G},
     {'Q', A | B | C | F | G},

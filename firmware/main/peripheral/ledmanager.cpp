@@ -234,6 +234,11 @@ void LedManager::render()
     {
         if (currentAnimation->needsUpdate())
         {
+            if (const auto& val = configs.ledOverrideDigits.value(); !val.empty())
+            {
+                ledManager->setText(val);
+            }
+
             switch (currentAnimation->renderType())
             {
                 case animation::ForEverySegment: {
@@ -293,6 +298,29 @@ std::string LedManager::toString() const
 uint16_t LedManager::getFps()
 {
     return FastLED.getFPS();
+}
+
+void LedManager::setText(std::string_view text)
+{
+    for (size_t i = 0; i < digits.size(); ++i)
+    {
+        if (i >= text.size())
+        {
+            digits[i].setChar(' ');
+            continue;
+        }
+
+        const auto& c = text[i];
+
+        if (std::isalnum(c))
+        {
+            digits[i].setChar(c);
+        }
+        else
+        {
+            digits[i].setChar(' ');
+        }
+    }
 }
 
 const std::array<CRGB, HARDWARE_WS2812B_COUNT>& getLeds()

@@ -202,4 +202,19 @@ fromJson(ConfigWrapper<T>& config, const std::string_view value)
         return std::unexpected(fmt::format("could not parse {}", value));
 }
 
+template<typename T>
+typename std::enable_if<
+        typeutils::is_optional_v<T> &&
+        !std::is_same_v<T, std::optional<wifi_stack::mac_t>>
+        , FromJsonReturnType>::type
+fromJson(ConfigWrapper<T>& config, const std::string_view value)
+{
+    if (value.empty() || value == "null")
+        return configs.write_config(config, std::nullopt);
+    else
+    {
+        return fromJson(config, value);
+    }
+}
+
 } // namespace webserver::apihelpers
