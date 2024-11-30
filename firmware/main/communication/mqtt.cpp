@@ -196,8 +196,7 @@ std::string format_error(esp_mqtt_error_codes_t* error_handle)
 
                     if (doc.containsKey("color"))
                     {
-                        auto color = doc["color"].as<JsonObject>();
-                        if (color.containsKey("r") && color.containsKey("g") && color.containsKey("b"))
+                        if (const auto color = doc["color"].as<JsonObject>(); color.containsKey("r") && color.containsKey("g") && color.containsKey("b"))
                         {
                             const auto r = color["r"].as<uint8_t>();
                             const auto g = color["g"].as<uint8_t>();

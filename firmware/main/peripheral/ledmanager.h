@@ -30,7 +30,7 @@ class LedManager
     using Digits = std::array<SevenSegmentDigit, 4>;
 
 public:
-    LedManager(Digits digits, ClockDot upper, ClockDot lower)
+    LedManager(Digits digits, const ClockDot &upper, const ClockDot &lower)
         : digits{std::move(digits)}, upper{upper}, lower{lower}
     {}
 
@@ -40,7 +40,7 @@ public:
 
     void render();
 
-    void setVisible(bool visible) { m_visible = visible; }
+    void setVisible(const bool visible) { m_visible = visible; }
 
     void handleVoltageAndCurrent();
 

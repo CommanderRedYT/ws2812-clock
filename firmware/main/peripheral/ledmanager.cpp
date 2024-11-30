@@ -80,18 +80,16 @@ bool isInSecondaryBrightnessTimeRange()
 
             return false;
         }
-        else
-        {
-            // same day
-            if ((dt.hour >= startHour.count() && dt.hour < endHour.count()) ||
-                (dt.hour == startHour.count() && dt.minute >= startMinute.count()) ||
-                (dt.hour == endHour.count() && dt.minute < endMinute.count()))
-            {
-                return true;
-            }
 
-            return false;
+        // same day
+        if ((dt.hour >= startHour.count() && dt.hour < endHour.count()) ||
+            (dt.hour == startHour.count() && dt.minute >= startMinute.count()) ||
+            (dt.hour == endHour.count() && dt.minute < endMinute.count()))
+        {
+            return true;
         }
+
+        return false;
     }
 
     if (secondaryBrightnessMode == SecondaryBrightnessMode::UseSunriseSunset)
@@ -107,7 +105,7 @@ bool barrel_jack_connected()
     // floating when not connected, pull down when connected
     static bool gpio_initialized = false;
 
-    auto barrel_jack = static_cast<gpio_num_t>(HARDWARE_BARREL_JACK_PIN);
+    constexpr auto barrel_jack = static_cast<gpio_num_t>(HARDWARE_BARREL_JACK_PIN);
 
     if (!gpio_initialized)
     {
@@ -245,8 +243,8 @@ void LedManager::render()
                     for (auto &digit: digits)
                     {
                         currentAnimation->update();
-                        digit.forEverySegment([&](SevenSegmentDigit::Segment segment, CRGB *startLed, CRGB *endLed,
-                                                  size_t length) {
+                        digit.forEverySegment([&](const SevenSegmentDigit::Segment segment, CRGB *startLed, CRGB *endLed,
+                                                  const size_t length) {
                             currentAnimation->render_segment(segment, digit, startLed, endLed, length);
                         });
                     }
@@ -300,7 +298,7 @@ uint16_t LedManager::getFps()
     return FastLED.getFPS();
 }
 
-void LedManager::setText(std::string_view text)
+void LedManager::setText(const std::string_view text)
 {
     for (size_t i = 0; i < digits.size(); ++i)
     {
@@ -310,9 +308,7 @@ void LedManager::setText(std::string_view text)
             continue;
         }
 
-        const auto& c = text[i];
-
-        if (std::isalnum(c))
+        if (const auto& c = text[i]; std::isalnum(c))
         {
             digits[i].setChar(c);
         }
