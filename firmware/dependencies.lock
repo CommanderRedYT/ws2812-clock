@@ -1,27 +1,49 @@
 dependencies:
   espressif/cmake_utilities:
     component_hash: 351350613ceafba240b761b4ea991e0f231ac7a9f59a9ee901f751bddc0bb18f
+    dependencies:
+    - name: idf
+      registry_url: https://components.espressif.com
+      require: private
+      version: '>=4.1'
     source:
-      service_url: https://api.components.espressif.com/
+      registry_url: https://components.espressif.com
       type: service
     version: 0.5.3
   espressif/esp-idf-cxx:
     component_hash: 2fa63e4e725f0c2d3dd6d99da8a91d404b4b49667088b1be0f336eb9c13ff17f
+    dependencies:
+    - name: idf
+      registry_url: https://components.espressif.com
+      require: private
+      version: '>=5.0'
     source:
-      service_url: https://api.components.espressif.com/
+      registry_url: https://components.espressif.com/
       type: service
     version: 1.0.2-beta
   espressif/pwm_audio:
     component_hash: 48a27530549e0c3d69a88f2a8a981feaf908ea1c033e43deb8f1a2ad941a6dd1
+    dependencies:
+    - name: idf
+      registry_url: https://components.espressif.com
+      require: private
+      version: '>=4.3'
+    - name: espressif/cmake_utilities
+      registry_url: https://components.espressif.com
+      require: private
+      version: 0.*
     source:
-      service_url: https://api.components.espressif.com/
+      registry_url: https://components.espressif.com/
       type: service
     version: 1.1.1
   idf:
-    component_hash: null
     source:
       type: idf
     version: 5.2.0
-manifest_hash: d6a33f99fc5a85c2805ed638c16a59a8688fd0b5e719f089dfefa37026d330cd
+direct_dependencies:
+- espressif/esp-idf-cxx
+- espressif/pwm_audio
+- idf
+manifest_hash: 0921fc7e51b833b76bd64edf1ec7a5f60bf2060b03eff3131a0ed7b3f892cf98
 target: esp32
-version: 1.0.0
+version: 2.0.0
