@@ -58,7 +58,7 @@ private:
 
     bool m_visible{};
 
-    uint8_t m_brightness{0};
+    float m_brightness{0};
     espchrono::millis_clock::time_point m_brightnessLastUpdate{};
 };
 

@@ -139,10 +139,17 @@ void LedManager::handleVoltageAndCurrent()
 
     ESP_LOGD(TAG, "brightness: %d, secondaryBrightness: %d, inSecondaryBrightnessTimeRange: %d", brightness, secondaryBrightness, inSecondaryBrightnessTimeRange);
 
-    uint8_t brightnessTarget = !m_visible ? 0 : inSecondaryBrightnessTimeRange ? secondaryBrightness : brightness;
+    const uint8_t brightnessTarget = !m_visible ? 0 : inSecondaryBrightnessTimeRange ? secondaryBrightness : brightness;
 
     constexpr float fadeFactor = 0.9f;
     m_brightness = m_brightness * fadeFactor + brightnessTarget * (1.0f - fadeFactor);
+
+    // if difference is less than 1, set to target
+    if (std::abs(m_brightness - brightnessTarget) < 1)
+    {
+        m_brightness = brightnessTarget;
+    }
+
     FastLED.setBrightness(m_brightness);
 
     if (barrel_jack_connected())
