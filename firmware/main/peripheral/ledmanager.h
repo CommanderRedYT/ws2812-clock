@@ -31,12 +31,12 @@ class LedManager
 
 public:
     LedManager(Digits digits, const ClockDot &upper, const ClockDot &lower)
-        : digits{std::move(digits)}, upper{upper}, lower{lower}
+        : digits{std::move(digits)}, upper_dot{upper}, lower_dot{lower}
     {}
 
     Digits digits;
-    ClockDot upper;
-    ClockDot lower;
+    ClockDot upper_dot;
+    ClockDot lower_dot;
 
     void render();
 
@@ -57,6 +57,9 @@ private:
     std::string toString() const;
 
     bool m_visible{};
+
+    bool m_dotsOn{};
+    bool m_lastDotsOn{};
 
     float m_brightness{0};
     espchrono::millis_clock::time_point m_brightnessLastUpdate{};

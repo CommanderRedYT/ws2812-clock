@@ -12,7 +12,6 @@ constexpr const char * const TAG = "ledmanager";
 
 // local includes
 #include "communication/ota.h"
-#include "peripheral/ledhelpers/animations/internal/otaanimation.h"
 #include "peripheral/ledhelpers/ledanimation.h"
 #include "utils/config.h"
 #include "utils/espclock.h"
@@ -228,10 +227,11 @@ void LedManager::render()
 {
     const auto now = espchrono::millis_clock::now();
 
-    const bool dotsOn = configs.disableDotBlinking.value() || now.time_since_epoch() % 1s < 500ms;
+    m_lastDotsOn = m_dotsOn;
+    m_dotsOn = configs.disableDotBlinking.value() || now.time_since_epoch() % 1s < 500ms;
 
-    upper.on(dotsOn);
-    lower.on(dotsOn);
+    upper_dot.on(m_dotsOn);
+    lower_dot.on(m_dotsOn);
 
     const auto overrideTimeoutConfig = configs.ledOverrideDigitsTimeout.value();
 
@@ -250,8 +250,10 @@ void LedManager::render()
     }
     else if (const auto currentAnimation = animation::currentAnimation; currentAnimation)
     {
-        if (currentAnimation->needsUpdate())
+        if (currentAnimation->needsUpdate() || m_lastDotsOn != m_dotsOn)
         {
+            const auto start_update = espchrono::millis_clock::now();
+
             if (const auto& val = configs.ledOverrideDigits.value(); !val.empty())
             {
                 const auto textChanged = ledManager->setText(val);
@@ -262,12 +264,17 @@ void LedManager::render()
                 }
             }
 
+            // Only update the current animation when the render is not triggered by the dots changing
+            if (m_lastDotsOn == m_dotsOn)
+            {
+                currentAnimation->update();
+            }
+
             switch (currentAnimation->renderType())
             {
                 case animation::ForEverySegment: {
                     for (auto &digit: digits)
                     {
-                        currentAnimation->update();
                         digit.forEverySegment([&](const SevenSegmentDigit::Segment segment, CRGB *startLed, CRGB *endLed,
                                                   const size_t length) {
                             currentAnimation->render_segment(segment, digit, startLed, endLed, length);
@@ -276,27 +283,28 @@ void LedManager::render()
                     break;
                 }
                 case animation::AllAtOnce: {
-                    currentAnimation->update();
                     currentAnimation->render_all(leds.begin(), leds.size());
                     break;
                 }
                 case animation::ForEveryDigit: {
-                    currentAnimation->update();
                     for (auto &digit: digits)
                     {
                         currentAnimation->render_digit(digit, &digit - &digits[0], leds.begin(), leds.size());
                     }
                     break;
                 }
-                }
+            }
 
-            currentAnimation->render_dot(upper, leds.begin(), leds.size());
-            currentAnimation->render_dot(lower, leds.begin(), leds.size());
+            currentAnimation->render_dot(upper_dot, leds.begin(), leds.size());
+            currentAnimation->render_dot(lower_dot, leds.begin(), leds.size());
+
+            const auto diffMs = espchrono::ago(start_update) / 1ms;
+            ESP_LOGI(TAG, "Updating animation took %lldms", diffMs);
         }
     }
 
-    upper.render();
-    lower.render();
+    upper_dot.render();
+    lower_dot.render();
 
     if (!configs.noClockDigits.value())
     {
@@ -314,8 +322,8 @@ std::string LedManager::toString() const
                        digits[1].toString(),
                        digits[2].toString(),
                        digits[3].toString(),
-                       upper.toString(),
-                       lower.toString());
+                       upper_dot.toString(),
+                       lower_dot.toString());
 }
 
 uint16_t LedManager::getFps()

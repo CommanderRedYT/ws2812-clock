@@ -58,7 +58,7 @@ public:
 
     void clear() { m_digit.reset(); }
 
-    void renderMask();
+    void renderMask() const;
 
     std::string toString() const;
 

@@ -11,7 +11,7 @@ void StaticColorAnimation::render_all(CRGB* leds, size_t length)
 
     const auto& primaryColor = configs.primaryColor.value();
     const auto color = CRGB(primaryColor.r, primaryColor.g, primaryColor.b);
-    std::fill(leds, leds + length, color);
+    std::fill_n(leds, length, color);
 }
 
 void StaticColorAnimation::render_dot(ClockDot& clockDot, CRGB* leds, size_t leds_length)
@@ -26,7 +26,7 @@ void StaticColorAnimation::render_dot(ClockDot& clockDot, CRGB* leds, size_t led
 
     const bool on = clockDot.on();
 
-    std::fill(startLed, startLed + length, on ? CRGB(secondaryColor.r, secondaryColor.g, secondaryColor.b) : CRGB(tertiaryColor.r, tertiaryColor.g, tertiaryColor.b));
+    std::fill_n(startLed, length, on ? CRGB(secondaryColor.r, secondaryColor.g, secondaryColor.b) : CRGB(tertiaryColor.r, tertiaryColor.g, tertiaryColor.b));
 }
 
 } // namespace animation

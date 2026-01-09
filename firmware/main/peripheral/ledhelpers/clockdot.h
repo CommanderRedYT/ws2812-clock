@@ -1,8 +1,6 @@
 #pragma once
 
 // system includes
-#include <cstdint>
-#include <optional>
 #include <string>
 
 // 3rdparty lib includes
@@ -19,7 +17,7 @@ public:
 
     explicit ClockDot(DotPlacement placement, CRGB* startLed, size_t length);
 
-    void render();
+    void render() const;
 
     void on(const bool on) { m_on = on; }
 

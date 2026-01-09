@@ -23,7 +23,7 @@ SevenSegmentDigit::SevenSegmentDigit(CRGB* startLed, const size_t length, const 
     }
 {}
 
-void SevenSegmentDigit::renderMask()
+void SevenSegmentDigit::renderMask() const
 {
     const uint8_t mask = digithelper::getSegmentMask(m_digit.value_or(' '));
 

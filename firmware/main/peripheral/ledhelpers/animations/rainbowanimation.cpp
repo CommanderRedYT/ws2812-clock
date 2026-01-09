@@ -9,7 +9,7 @@ void RainbowAnimation::update()
     m_hue += 1;
 }
 
-void RainbowAnimation::render_all(CRGB* leds, size_t leds_length)
+void RainbowAnimation::render_all(CRGB* leds, const size_t leds_length)
 {
     Base::render_all(leds, leds_length);
 

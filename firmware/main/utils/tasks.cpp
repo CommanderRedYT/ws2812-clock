@@ -34,7 +34,7 @@ SchedulerTask tasksArray[]{
 #ifdef HARDWARE_USE_BME280
     SchedulerTask{"bme280",    bme280_sensor::begin, noop,                 1s},
 #endif
-    SchedulerTask{"led",       ledmanager::begin,    ledmanager::update, 16ms},
+    SchedulerTask{"led",       ledmanager::begin,    ledmanager::update, 8ms},
     SchedulerTask{"basicleds", basicleds::begin,     basicleds::update,  60ms},
     SchedulerTask{"espclock",  espclock::begin,      espclock::update,  100ms},
     SchedulerTask{"webserver", webserver::begin,     noop,                 1s},
