@@ -11,9 +11,10 @@ constexpr const char * const TAG = "ledanimation";
 #include "utils/config.h"
 
 // animations
-#include "peripheral/ledhelpers/animations/rainbowanimation.h"
-#include "peripheral/ledhelpers/animations/staticcoloranimation.h"
 #include "peripheral/ledhelpers/animations/newyearanimation.h"
+#include "peripheral/ledhelpers/animations/rainbowanimation.h"
+#include "peripheral/ledhelpers/animations/randomcoloranimation.h"
+#include "peripheral/ledhelpers/animations/staticcoloranimation.h"
 #include "peripheral/ledhelpers/animations/stroboanimation.h"
 
 namespace animation {
@@ -23,6 +24,7 @@ LedAnimation* animationsArr[]{
     new StaticColorAnimation(),
     new NewYearAnimation(),
     new StroboAnimation(),
+    new RandomColorAnimation(),
 };
 
 cpputils::ArrayView<LedAnimation*> animations{animationsArr};
@@ -47,7 +49,7 @@ std::expected<void, std::string> updateAnimation(const LedAnimationName enumValu
     }
     else
     {
-        for (auto animation: animations)
+        for (const auto animation: animations)
         {
             if (animation->getEnumValue() == enumValue)
             {

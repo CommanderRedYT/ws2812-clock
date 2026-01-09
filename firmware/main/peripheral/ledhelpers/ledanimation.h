@@ -15,10 +15,11 @@
 #include "peripheral/ledmanager.h"
 
 #define LedAnimationNameValues(x) \
-    x(Rainbow) \
-    x(StaticColor) \
+    x(Rainbow)                    \
+    x(StaticColor)                \
     x(NewYearAnimation)           \
-    x(Strobo)
+    x(Strobo)                     \
+    x(RandomColor)
 DECLARE_GLOBAL_TYPESAFE_ENUM(LedAnimationName, : uint8_t, LedAnimationNameValues);
 
 namespace animation {
@@ -33,14 +34,14 @@ class LedAnimation
 {
 public:
 
-    void start(CRGB* leds, size_t leds_length)
+    void start(CRGB* leds, const size_t leds_length)
     {
         init(leds, leds_length);
 
         m_lastRender = espchrono::millis_clock::now();
     }
 
-    void stop(CRGB* leds, size_t leds_length)
+    void stop(CRGB* leds, const size_t leds_length)
     {
         deinit(leds, leds_length);
 
