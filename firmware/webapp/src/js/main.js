@@ -43,8 +43,12 @@ window.addEventListener('load', async () => {
         const { status } = response;
 
         if (status.name) {
-            document.title = status.name;
             document.getElementById('deviceName').innerText = status.name;
+
+            if (window.originalTitle !== status.name) {
+                document.title = status.name;
+                window.originalTitle = document.title;
+            }
         }
 
         lastMessage = Date.now();
@@ -78,6 +82,15 @@ window.addEventListener('load', async () => {
 
         const otherOtaPartition = document.getElementById('otherOtaPartition');
         otherOtaPartition.innerHTML = generateOtherOtaPartitionHtml(ota.otherApp);
+
+        if (window.originalTitle) {
+            if (ota.isInProgress) {
+                const titleWithProgress = `(${Math.round(ota.percentage)}%) Updating ${window.originalTitle}`
+                document.title = titleWithProgress;
+            } else {
+                document.title = window.originalTitle;
+            }
+        }
     });
 
     window.clockApi.on('onConfigChange', config => {
