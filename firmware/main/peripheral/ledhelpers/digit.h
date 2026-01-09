@@ -16,23 +16,43 @@ class SevenSegmentDigit
 public:
     explicit SevenSegmentDigit(CRGB* startLed, size_t length, size_t ledsPerSegment = 8);
 
-    SevenSegmentDigit(CRGB* startLed, size_t length, const CRGB& color, size_t ledsPerSegment = 8)
+    SevenSegmentDigit(CRGB* startLed, const size_t length, const CRGB& color, const size_t ledsPerSegment = 8)
         : SevenSegmentDigit{startLed, length, ledsPerSegment}
     {
         setColor(color);
     }
 
-    void setDigit(uint8_t digit) { setChar('0' + digit); }
+    void setDigit(const uint8_t digit) { setChar('0' + digit); }
 
-    void setDigit(uint8_t digit, const CRGB& color) { setChar('0' + digit, color); }
+    void setDigit(const uint8_t digit, const CRGB& color) { setChar('0' + digit, color); }
 
-    void setChar(char c) { m_digit = c; }
+    bool setChar(char c)
+    {
+        if (m_digit != c)
+        {
+            m_digit = c;
+            return true;
+        }
 
-    void setChar(char c, const CRGB& color) { m_digit = c; setColor(color); }
+        return false;
+    }
+
+    bool setChar(char c, const CRGB& color)
+    {
+        setColor(color);
+
+        if (m_digit != c)
+        {
+            m_digit = c;
+            return true;
+        }
+
+        return false;
+    }
 
     void setColor(const CRGB& color)
     {
-        std::fill(std::begin(m_segmentColors), std::end(m_segmentColors), color);
+        std::ranges::fill(m_segmentColors, color);
         m_isStaticColor = true;
     }
 
@@ -65,9 +85,9 @@ public:
 
 private:
 
-    void fillSegment(Segment segment, const CRGB& color);
+    void fillSegment(Segment segment, const CRGB& color) const;
 
-    void clearSegment(Segment segment) { fillSegment(segment, CRGB::Black); }
+    void clearSegment(const Segment segment) const { fillSegment(segment, CRGB::Black); }
 
     // void setSegmentAnimation(Segment segment, animation_t animation);
 

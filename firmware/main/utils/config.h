@@ -18,7 +18,6 @@
 #include <configwrapper.h>
 #include <espchrono.h>
 #include <espwifistack.h>
-#include <fmt/core.h>
 
 // local includes
 #include "peripheral/ledhelpers/ledanimation.h"
@@ -360,6 +359,13 @@ public:
         std::string defaultValue() const final { return {}; }
         ConfigConstraintReturnType checkValue(value_t value) const final { return {}; }
     } ledOverrideDigits;
+    struct : ConfigWrapper<uint16_t>
+    {
+        bool allowReset() const final { return true; }
+        const char* nvsName() const final { return "overrideTimeout"; }
+        value_t defaultValue() const final { return 0; }
+        ConfigConstraintReturnType checkValue(value_t value) const final { return {}; }
+    } ledOverrideDigitsTimeout;
 
     // Time
     struct : ConfigWrapper<minutes32>
@@ -585,6 +591,7 @@ public:
         ITER_CONFIG(ledMilliAmpereUsbC)
         ITER_CONFIG(ledMilliAmpereBarrelJack)
         ITER_CONFIG(ledOverrideDigits)
+        ITER_CONFIG(ledOverrideDigitsTimeout)
 
         // Time
         ITER_CONFIG(timeOffset)

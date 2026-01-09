@@ -44,12 +44,10 @@ void update()
     espcpputils::RecursiveLockHelper guard{global::global_lock->handle};
     wifi_stack::update(createConfig());
 
-    const bool staConnected = isStaConnected();
-
-    if (staConnected != lastStaConnected)
+    if (const bool connected = isStaConnected(); connected != lastStaConnected)
     {
-        lastStaConnected = staConnected;
-        if (staConnected)
+        lastStaConnected = connected;
+        if (connected)
         {
             ESP_LOGI(TAG, "STA connected");
             espclock::syncNow();
@@ -66,7 +64,7 @@ std::expected<void, std::string> startScan()
         return std::unexpected("WIFI_STA is not enabled");
 
     if (const auto result = wifi_stack::begin_scan(*staConfig); !result)
-        return std::unexpected(fmt::format("wifi_stack::begin_scan() failed: {}", result.error()));
+        return std::unexpected(std::format("wifi_stack::begin_scan() failed: {}", result.error()));
 
     return {};
 }
@@ -108,7 +106,7 @@ std::optional<wifi_stack::sta_config> createStaConfig()
 
     return wifi_stack::sta_config{
         .hostname = configs.hostname.value(),
-        .wifis = []() {
+        .wifis = [] {
             std::array<wifi_stack::wifi_entry, CONFIG_WIFI_STA_CONFIG_COUNT> wifis;
             for (size_t i = 0; i < CONFIG_WIFI_STA_CONFIG_COUNT; ++i)
                 wifis[i] = createWiFiEntry(configs.wifis[i]);

@@ -153,7 +153,7 @@ esp_err_t generateStatusJson(JsonDocument& statusObj)
 
 esp_err_t generateStatusJson(std::string& json)
 {
-    auto guard = getApiJson();
+    const auto guard = getApiJson();
     auto& doc = *guard;
 
     doc.clear();
@@ -190,7 +190,7 @@ esp_err_t forEveryKey(const std::function<void(const JsonString&, const JsonVari
             for (const auto& kv2 : kv.value().as<JsonObject>())
             {
                 // kv.key()/kv2.key()
-                std::string key = fmt::format("{}/{}", kv.key().c_str(), kv2.key().c_str());
+                std::string key = std::format("{}/{}", kv.key().c_str(), kv2.key().c_str());
                 callback(key.c_str(), kv2.value());
             }
         }

@@ -2,13 +2,12 @@
 
 constexpr const char * const TAG = "webserver_frontend";
 
+// system includes
+#include <format>
+
 // esp-idf includes
 #include <esp_log.h>
-#include <lwip/inet.h>
 #include <lwip/sockets.h>
-
-// 3rdparty lib includes
-#include <fmt/format.h>
 
 // code-gen
 #include "webserver_files.h"
@@ -38,7 +37,7 @@ esp_err_t captive_portal_handler(httpd_req_t *req)
     if (host != toString(configs.wifiApIp.value()))
     {
         // redirect to the captive portal
-        const auto redirectUrl = fmt::format("http://{}/", toString(configs.wifiApIp.value()));
+        const auto redirectUrl = std::format("http://{}/", toString(configs.wifiApIp.value()));
         ESP_LOGI(TAG, "Redirecting to %s", redirectUrl.c_str());
         httpd_resp_set_hdr(req, "Location", redirectUrl.c_str());
         httpd_resp_set_status(req, "302 Found");
@@ -54,7 +53,7 @@ esp_err_t handle_not_found(httpd_req_t* req, httpd_err_code_t error)
 {
     ESP_LOGW(TAG, "handle_not_found(): %d", error);
     // redirect to /
-    const auto redirectUrl = fmt::format("http://{}/", toString(configs.wifiApIp.value()));
+    const auto redirectUrl = std::format("http://{}/", toString(configs.wifiApIp.value()));
     ESP_LOGI(TAG, "Redirecting to %s", redirectUrl.c_str());
     if (const auto res = httpd_resp_set_hdr(req, "Location", redirectUrl.c_str()); res != ESP_OK)
     {

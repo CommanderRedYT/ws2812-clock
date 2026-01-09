@@ -1,11 +1,13 @@
 #include "configapihelper.h"
 
+// system includes
+#include <format>
+
 // esp-idf includes
 #include <esp_log.h>
 
 // 3rdparty lib includes
 #include <ArduinoJson.h>
-#include <fmt/core.h>
 #include <recursivelockhelper.h>
 #include <wrappers/recursive_mutex_semaphore.h>
 
@@ -144,7 +146,7 @@ const ConfigApiSetResult* setConfigFromJsonViaQuery(const std::string& requestQu
         if (const auto res = httpd_query_key_value(requestQuery.data(), nvsName.data(), valueBufEncoded, sizeof(valueBufEncoded)); res != ESP_ERR_NOT_FOUND && res != ESP_OK)
         {
             // { "success": false, "message": "..." }
-            configApiSetResult.error = fmt::format("{{\"success\":false, \"message\": \"Failed to get value (nvsName={} err={} requestQuery={})\"}}", nvsName, esp_err_to_name(res), requestQuery);
+            configApiSetResult.error = std::format("{{\"success\":false, \"message\": \"Failed to get value (nvsName={} err={} requestQuery={})\"}}", nvsName, esp_err_to_name(res), requestQuery);
             configApiSetResult.success = false;
             return false;
         }
@@ -160,16 +162,16 @@ const ConfigApiSetResult* setConfigFromJsonViaQuery(const std::string& requestQu
         {
             // { "success": false, "message": "..." }
             if (!successfullySetKey)
-                configApiSetResult.error = fmt::format("{{\"success\":false, \"message\": \"Failed to save value for key {} ({})\", \"keys\": []}}", nvsName, res.error());
+                configApiSetResult.error = std::format("{{\"success\":false, \"message\": \"Failed to save value for key {} ({})\", \"keys\": []}}", nvsName, res.error());
             else
-                configApiSetResult.error = fmt::format("{{\"success\":false, \"message\": \"Failed to save value for key {} ({})\", \"keys\": {}]}}", nvsName, res.error(), successResult);
+                configApiSetResult.error = std::format("{{\"success\":false, \"message\": \"Failed to save value for key {} ({})\", \"keys\": {}]}}", nvsName, res.error(), successResult);
             configApiSetResult.success = false;
             return true;
         }
         else
         {
             // { "success": true, "message": "..." }
-            successResult += fmt::format(R"({{"key": "{}", "value": "{}"}},)", nvsName, valueBuf);
+            successResult += std::format(R"({{"key": "{}", "value": "{}"}},)", nvsName, valueBuf);
             successfullySetKey = true;
             configApiSetResult.success = true;
             configApiSetResult.error = std::nullopt;
@@ -208,7 +210,7 @@ const ConfigApiSetResult* setConfigFromJsonViaBody(const std::string& requestBod
 
     if (const auto res = deserializeJson(doc, requestBody); res != DeserializationError::Ok)
     {
-        configApiSetResult.error = fmt::format("{{\"success\":false, \"message\": \"Failed to parse JSON body ({})\"}}", res.c_str());
+        configApiSetResult.error = std::format("{{\"success\":false, \"message\": \"Failed to parse JSON body ({})\"}}", res.c_str());
         configApiSetResult.success = false;
         return &configApiSetResult;
     }
@@ -228,11 +230,11 @@ const ConfigApiSetResult* setConfigFromJsonViaBody(const std::string& requestBod
             {
                 // { "success": false, "message": "..." }
                 if (!successfullySetKey)
-                    configApiSetResult.error = fmt::format(
+                    configApiSetResult.error = std::format(
                             "{{\"success\":false, \"message\": \"Failed to save value for key {} ({})\", \"keys\": []}}",
                             nvsName, res.error());
                 else
-                    configApiSetResult.error = fmt::format(
+                    configApiSetResult.error = std::format(
                             "{{\"success\":false, \"message\": \"Failed to save value for key {} ({})\", \"keys\": {}]}}",
                             nvsName, res.error(), successResult);
                 configApiSetResult.success = false;
@@ -241,7 +243,7 @@ const ConfigApiSetResult* setConfigFromJsonViaBody(const std::string& requestBod
             else
             {
                 // { "success": true, "message": "..." }
-                successResult += fmt::format(R"("{{"key": "{}", "value": "{}"}}",)", nvsName, value);
+                successResult += std::format(R"("{{"key": "{}", "value": "{}"}}",)", nvsName, value);
                 successfullySetKey = true;
                 return true;
             }
@@ -264,11 +266,11 @@ const ConfigApiSetResult* setConfigFromJsonViaBody(const std::string& requestBod
         {
             // { "success": false, "message": "..." }
             if (!successfullySetKey)
-                configApiSetResult.error = fmt::format(
+                configApiSetResult.error = std::format(
                         "{{\"success\":false, \"message\": \"Failed to save value for key {} ({})\", \"keys\": []}}",
                         nvsName, res.error());
             else
-                configApiSetResult.error = fmt::format(
+                configApiSetResult.error = std::format(
                         "{{\"success\":false, \"message\": \"Failed to save value for key {} ({})\", \"keys\": {}]}}",
                         nvsName, res.error(), successResult);
             configApiSetResult.success = false;
@@ -277,7 +279,7 @@ const ConfigApiSetResult* setConfigFromJsonViaBody(const std::string& requestBod
         else
         {
             // { "success": true, "message": "..." }
-            successResult += fmt::format(R"({{"key": "{}", "value": "{}"}},)", nvsName, value.as<std::string>());
+            successResult += std::format(R"({{"key": "{}", "value": "{}"}},)", nvsName, value.as<std::string>());
             successfullySetKey = true;
             return false;
         }

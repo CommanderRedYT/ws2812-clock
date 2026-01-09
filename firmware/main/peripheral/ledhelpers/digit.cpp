@@ -2,14 +2,12 @@
 
 // system includes
 #include <algorithm>
-
-// 3rdparty lib includes
-#include <fmt/core.h>
+#include <format>
 
 // local includes
 #include "digithelper.h"
 
-SevenSegmentDigit::SevenSegmentDigit(CRGB* startLed, size_t length, size_t ledsPerSegment) :
+SevenSegmentDigit::SevenSegmentDigit(CRGB* startLed, const size_t length, const size_t ledsPerSegment) :
     m_startLed{startLed},
     m_length{length},
     m_ledsPerSegment{ledsPerSegment},
@@ -27,7 +25,7 @@ SevenSegmentDigit::SevenSegmentDigit(CRGB* startLed, size_t length, size_t ledsP
 
 void SevenSegmentDigit::renderMask()
 {
-    uint8_t mask = digithelper::getSegmentMask(m_digit.value_or(' '));
+    const uint8_t mask = digithelper::getSegmentMask(m_digit.value_or(' '));
 
     if (mask & 0b00000001) /*fillSegment(A, m_segmentColors[A]);*/{} else clearSegment(A);
     if (mask & 0b00000010) /*fillSegment(B, m_segmentColors[B]);*/{} else clearSegment(B);
@@ -49,10 +47,10 @@ void SevenSegmentDigit::renderMask()
 
  */
 
-void SevenSegmentDigit::fillSegment(Segment segment, const CRGB &color)
+void SevenSegmentDigit::fillSegment(const Segment segment, const CRGB &color) const
 {
-    size_t start = segment * m_ledsPerSegment;
-    size_t end = start + m_ledsPerSegment;
+    const size_t start = segment * m_ledsPerSegment;
+    const size_t end = start + m_ledsPerSegment;
 
     ESP_LOGD("SevenSegmentDigit", "fillSegment: start=%d, end=%d, color=rgb(%d, %d, %d)", start, end, color.r, color.g, color.b);
     std::fill(m_startLed + start, m_startLed + end, color);
@@ -65,19 +63,19 @@ std::string SevenSegmentDigit::toString() const
     if (c == ' ') return "SevenSegmentDigit(digit= )";
     if (c == '\0') return "SevenSegmentDigit(digit=\\0)";
 
-    return fmt::format("SevenSegmentDigit(digit={})", c);
+    return std::format("SevenSegmentDigit(digit={})", c);
 }
 
 void SevenSegmentDigit::forEverySegment(const std::function<void(Segment, CRGB*, CRGB*, size_t)>& func) const
 {
-    for (auto segment = Segment(0); segment <= LAST_SEGMENT; segment = Segment(segment + 1))
+    for (auto segment = static_cast<Segment>(0); segment <= LAST_SEGMENT; segment = static_cast<Segment>(segment + 1))
     {
-        size_t start = segment * m_ledsPerSegment;
-        size_t end = start + m_ledsPerSegment;
+        const size_t start = segment * m_ledsPerSegment;
+        const size_t end = start + m_ledsPerSegment;
 
         CRGB* startLed = m_startLed + start;
         CRGB* endLed = m_startLed + end;
-        size_t length = end - start;
+        const size_t length = end - start;
 
         func(segment, startLed, endLed, length);
     }

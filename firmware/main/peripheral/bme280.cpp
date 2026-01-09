@@ -5,6 +5,7 @@ constexpr const char * const TAG = "sensors::bme280";
 
 // system includes
 #include <expected>
+#include <format>
 #include <string>
 
 // esp-idf includes
@@ -16,7 +17,6 @@ constexpr const char * const TAG = "sensors::bme280";
 #include <bmx280.h>
 #include <cleanuphelper.h>
 #include <espchrono.h>
-#include <fmt/format.h>
 
 namespace bme280_sensor {
 
@@ -28,7 +28,7 @@ void bmx280_task(void*)
 {
     auto helper = cpputils::makeCleanupHelper([](){ vTaskDelete(nullptr); });
 
-    i2c_config_t i2c_cfg = {
+    constexpr i2c_config_t i2c_cfg = {
             .mode = I2C_MODE_MASTER,
             .sda_io_num = HARDWARE_I2C_SDA,
             .scl_io_num = HARDWARE_I2C_SCL,
@@ -39,7 +39,7 @@ void bmx280_task(void*)
             }
     };
 
-    if (auto res = i2c_param_config(I2C_NUM_0, &i2c_cfg); res != ESP_OK)
+    if (const auto res = i2c_param_config(I2C_NUM_0, &i2c_cfg); res != ESP_OK)
     {
         ESP_LOGE(TAG, "i2c_param_config failed: %s", esp_err_to_name(res));
         return;
@@ -47,7 +47,7 @@ void bmx280_task(void*)
     else
         ESP_LOGI(TAG, "i2c_param_config ok");
 
-    if (auto res = i2c_driver_install(I2C_NUM_0, I2C_MODE_MASTER, 0, 0, 0); res != ESP_OK)
+    if (const auto res = i2c_driver_install(I2C_NUM_0, I2C_MODE_MASTER, 0, 0, 0); res != ESP_OK)
     {
         ESP_LOGE(TAG, "i2c_driver_install failed: %s", esp_err_to_name(res));
         return;
@@ -65,7 +65,7 @@ void bmx280_task(void*)
     else
         ESP_LOGI(TAG, "bmx280_create ok");
 
-    if (auto res = bmx280_init(bme280.dev); res != ESP_OK)
+    if (const auto res = bmx280_init(bme280.dev); res != ESP_OK)
     {
         ESP_LOGE(TAG, "bmx280_init failed: %s", esp_err_to_name(res));
         return;
@@ -73,9 +73,9 @@ void bmx280_task(void*)
     else
         ESP_LOGI(TAG, "bmx280_init ok");
 
-    bmx280_config_t bmx_cfg = BMX280_DEFAULT_CONFIG;
+    auto bmx_cfg = BMX280_DEFAULT_CONFIG;
 
-    if (auto res = bmx280_configure(bme280.dev, &bmx_cfg); res != ESP_OK)
+    if (const auto res = bmx280_configure(bme280.dev, &bmx_cfg); res != ESP_OK)
     {
         ESP_LOGE(TAG, "bmx280_set_config failed: %s", esp_err_to_name(res));
         return;
@@ -92,7 +92,7 @@ void bmx280_task(void*)
 
         bme280.mutex.lock();
 
-        if (auto res = bmx280_setMode(bme280.dev, BMX280_MODE_FORCE); res != ESP_OK)
+        if (const auto res = bmx280_setMode(bme280.dev, BMX280_MODE_FORCE); res != ESP_OK)
         {
             ESP_LOGE(TAG, "bmx280_force failed: %s", esp_err_to_name(res));
             return;
@@ -106,7 +106,7 @@ void bmx280_task(void*)
 
         float temp, press, hum, alt = 0.0f;
 
-        if (auto res = bmx280_readoutFloat(bme280.dev, &temp, &press, &hum, &alt); res != ESP_OK)
+        if (const auto res = bmx280_readoutFloat(bme280.dev, &temp, &press, &hum, &alt); res != ESP_OK)
         {
             ESP_LOGE(TAG, "bmx280_readFloat failed: %s", esp_err_to_name(res));
             return;
@@ -136,7 +136,7 @@ void begin()
 
 std::string BME280::toString() const
 {
-    return fmt::format("temperature: {:.2f}°C, pressure: {:.2f}hPa, humidity: {:.2f}%, altitude: {:.2f}m",
+    return std::format("temperature: {:.2f}°C, pressure: {:.2f}hPa, humidity: {:.2f}%, altitude: {:.2f}m",
                        data->temperature, data->pressure, data->humidity, data->altitude);
 }
 

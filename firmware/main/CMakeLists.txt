@@ -9,7 +9,6 @@ set(dependencies
         freertos
         esp_system
         arduino-esp32
-        fmt
         ArduinoJson
         espchrono
         cpputils

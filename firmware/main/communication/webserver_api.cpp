@@ -216,7 +216,7 @@ esp_err_t api_set_via_post_handler(httpd_req_t* req)
         if (const auto res = httpd_req_get_hdr_value_str(req, "Content-Type", contentType, 32); res != ESP_OK)
         {
             ESP_LOGE(TAG, "Failed to get Content-Type header: %s", esp_err_to_name(res));
-            if (const auto resp_res = esphttpdutils::webserver_resp_send(req, esphttpdutils::ResponseStatus::BadRequest, "application/json", fmt::format(R"({{"success":false,"message":"Failed to get Content-Type header: {}"}})", esp_err_to_name(res))); resp_res != ESP_OK)
+            if (const auto resp_res = esphttpdutils::webserver_resp_send(req, esphttpdutils::ResponseStatus::BadRequest, "application/json", std::format(R"({{"success":false,"message":"Failed to get Content-Type header: {}"}})", esp_err_to_name(res))); resp_res != ESP_OK)
                 ESP_LOGE(TAG, "Failed to send response: %s", esp_err_to_name(resp_res));
             return ESP_FAIL;
         }
@@ -225,7 +225,7 @@ esp_err_t api_set_via_post_handler(httpd_req_t* req)
             if (strcmp(contentType, "application/json") != 0)
             {
                 ESP_LOGE(TAG, "Invalid Content-Type: %s", contentType);
-                if (const auto resp_res = esphttpdutils::webserver_resp_send(req, esphttpdutils::ResponseStatus::BadRequest, "application/json", fmt::format(R"({{"success":false,"message":"Invalid Content-Type: {}"}})", contentType)); resp_res != ESP_OK)
+                if (const auto resp_res = esphttpdutils::webserver_resp_send(req, esphttpdutils::ResponseStatus::BadRequest, "application/json", std::format(R"({{"success":false,"message":"Invalid Content-Type: {}"}})", contentType)); resp_res != ESP_OK)
                     ESP_LOGE(TAG, "Failed to send response: %s", esp_err_to_name(resp_res));
                 return ESP_FAIL;
             }
@@ -317,7 +317,7 @@ esp_err_t api_get_leds_handler(httpd_req_t* req)
     for (auto i = 0; i < leds.size(); ++i)
     {
         const auto& led = leds[i];
-        const auto json = fmt::format("[{},{},{}]{}", led.red, led.green, led.blue, i < leds.size() - 1 ? "," : "");
+        const auto json = std::format("[{},{},{}]{}", led.red, led.green, led.blue, i < leds.size() - 1 ? "," : "");
         if (const auto res = httpd_resp_send_chunk(req, json.c_str(), json.size()); res != ESP_OK)
         {
             ESP_LOGE(TAG, "Failed to send response: %s", esp_err_to_name(res));
@@ -522,7 +522,7 @@ esp_err_t api_trigger_ota_handler(httpd_req_t* req)
     else
     {
         ESP_LOGE(TAG, "%.*s", result.error().size(), result.error().data());
-        if (const auto res = esphttpdutils::webserver_resp_send(req, esphttpdutils::ResponseStatus::BadRequest, "application/json", fmt::format(R"({{"success":false,"message":"{}"}})", result.error())); res != ESP_OK)
+        if (const auto res = esphttpdutils::webserver_resp_send(req, esphttpdutils::ResponseStatus::BadRequest, "application/json", std::format(R"({{"success":false,"message":"{}"}})", result.error())); res != ESP_OK)
             ESP_LOGE(TAG, "Failed to send response: %s", esp_err_to_name(res));
         return ESP_FAIL;
     }
@@ -536,7 +536,7 @@ esp_err_t api_trigger_ota_handler(httpd_req_t* req)
         {
             if (result == ESP_ERR_NOT_FOUND)
             {
-                const auto msg = fmt::format(R"({{"success":false,"message":"Missing required parameter '{}'"}})", urlParamName);
+                const auto msg = std::format(R"({{"success":false,"message":"Missing required parameter '{}'"}})", urlParamName);
                 ESP_LOGW(TAG, "%.*s", msg.size(), msg.data());
                 if (const auto res = esphttpdutils::webserver_resp_send(req, esphttpdutils::ResponseStatus::BadRequest, "application/json", msg); res != ESP_OK)
                     ESP_LOGE(TAG, "Failed to send response: %s", esp_err_to_name(res));
@@ -544,7 +544,7 @@ esp_err_t api_trigger_ota_handler(httpd_req_t* req)
             }
             else
             {
-                const auto msg = fmt::format("{{\"success\":false,\"message\":\"Failed to get parameter '{}' ({})\"}}", urlParamName, esp_err_to_name(result));
+                const auto msg = std::format("{{\"success\":false,\"message\":\"Failed to get parameter '{}' ({})\"}}", urlParamName, esp_err_to_name(result));
                 ESP_LOGE(TAG, "%.*s", msg.size(), msg.data());
                 if (const auto res = esphttpdutils::webserver_resp_send(req, esphttpdutils::ResponseStatus::BadRequest, "application/json", msg); res != ESP_OK)
                     ESP_LOGE(TAG, "Failed to send response: %s", esp_err_to_name(res));
@@ -560,7 +560,7 @@ esp_err_t api_trigger_ota_handler(httpd_req_t* req)
 
     if (const auto otaRes = ota::trigger(url); !otaRes)
     {
-        const auto msg = fmt::format("{{\"success\":false,\"message\":\"Failed to trigger OTA ({})\"}}", otaRes.error());
+        const auto msg = std::format("{{\"success\":false,\"message\":\"Failed to trigger OTA ({})\"}}", otaRes.error());
         ESP_LOGE(TAG, "%.*s", msg.size(), msg.data());
         if (const auto res = esphttpdutils::webserver_resp_send(req, esphttpdutils::ResponseStatus::InternalServerError, "application/json", msg); res != ESP_OK)
             ESP_LOGE(TAG, "Failed to send response: %s", esp_err_to_name(res));
@@ -605,7 +605,7 @@ esp_err_t api_switch_ota_handler(httpd_req_t* req)
     }
     else
     {
-        const auto msg = fmt::format("{{\"success\":false,\"message\":\"Failed to switch OTA partition ({})\"}}", ota_res.error());
+        const auto msg = std::format("{{\"success\":false,\"message\":\"Failed to switch OTA partition ({})\"}}", ota_res.error());
         ESP_LOGE(TAG, "%.*s", msg.size(), msg.data());
         if (const auto res = esphttpdutils::webserver_resp_send(req, esphttpdutils::ResponseStatus::InternalServerError, "application/json", msg); res != ESP_OK)
             ESP_LOGE(TAG, "Failed to send response: %s", esp_err_to_name(res));

@@ -112,10 +112,10 @@ void setTimeInLedManager()
     {
         auto& ledManager = *ledmanager::ledManager;
 
-        auto now = espchrono::toDateTime(espchrono::local_clock::now());
+        const auto now = espchrono::toDateTime(espchrono::local_clock::now());
 
-        auto hour = now.hour;
-        auto minute = now.minute;
+        const auto hour = now.hour;
+        const auto minute = now.minute;
 
         // 0 1 2 3
         // h h m m

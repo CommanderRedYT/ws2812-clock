@@ -46,11 +46,11 @@ public:
 
     static uint16_t getFps();
 
-    uint8_t getBrightness() const { return m_brightness; }
+    float getBrightness() const { return m_brightness; }
 
     bool isVisible() const { return m_visible && m_brightness > 0; }
 
-    void setText(std::string_view text);
+    bool setText(std::string_view text);
 
 private:
 
@@ -60,6 +60,8 @@ private:
 
     float m_brightness{0};
     espchrono::millis_clock::time_point m_brightnessLastUpdate{};
+
+    std::optional<espchrono::millis_clock::time_point> m_overrideTriggeredAt{};
 };
 
 extern cpputils::DelayedConstruction<LedManager> ledManager;

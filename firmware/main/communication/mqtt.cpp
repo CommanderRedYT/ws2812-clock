@@ -89,7 +89,7 @@ std::string format_error(esp_mqtt_error_codes_t* error_handle)
         break;
     }
 
-    return fmt::format("error_type: {}, connect_return_code: {}", error_type, connect_return_code);
+    return std::format("error_type: {}, connect_return_code: {}", error_type, connect_return_code);
 }
 
 [[noreturn]] void mqtt_handle_send(void*)
@@ -145,7 +145,7 @@ std::string format_error(esp_mqtt_error_codes_t* error_handle)
             // {mqttTopic}/{hostname}/set/brightness
             // {mqttTopic}/{hostname}/set/animation
 
-            if (std::get<0>(*entry).find(fmt::format("{}/{}/set/", configs.mqttTopic.value(), configs.hostname.value())) == 0)
+            if (std::get<0>(*entry).find(std::format("{}/{}/set/", configs.mqttTopic.value(), configs.hostname.value())) == 0)
             {
                 const std::string topic = std::get<0>(*entry);
                 const std::string value = std::get<1>(*entry);
@@ -225,7 +225,7 @@ void publishStatus()
 {
     status::forEveryKey([&](const JsonString& key, const JsonVariant& value){
         // ESP_LOGI(TAG, "publishStatus: %s=%s", key.c_str(), value.as<char*>());
-        std::string topic = fmt::format("{}/{}/status/{}", configs.mqttTopic.value(), configs.hostname.value(), key.c_str());
+        std::string topic = std::format("{}/{}/status/{}", configs.mqttTopic.value(), configs.hostname.value(), key.c_str());
         std::string valueBuffer;
 
         serializeJson(value, valueBuffer);
@@ -247,7 +247,7 @@ void publishHomeassistantDiscovery()
     const std::optional<std::string> configurationUrl = []() -> std::optional<std::string> {
         if (const auto ip_result = wifi_stack::get_ip_info(wifi_stack::esp_netifs[ESP_IF_WIFI_STA]))
         {
-            return fmt::format("http://{}/", wifi_stack::toString(ip_result->ip));
+            return std::format("http://{}/", wifi_stack::toString(ip_result->ip));
         }
 
         return std::nullopt;
@@ -276,66 +276,66 @@ void publishHomeassistantDiscovery()
     {
         doc.clear();
         doc["name"] = "BME280 Temperature";
-        doc["state_topic"] = fmt::format("{}/{}/status/bme280/temp", configs.mqttTopic.value(), configs.hostname.value());
-        doc["availability_topic"] = fmt::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
+        doc["state_topic"] = std::format("{}/{}/status/bme280/temp", configs.mqttTopic.value(), configs.hostname.value());
+        doc["availability_topic"] = std::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
         doc["payload_available"] = "true";
         doc["payload_not_available"] = "false";
         doc["unit_of_measurement"] = "°C";
         doc["value_template"] = "{{ value_json }}";
         doc["state_class"] = "measurement";
         doc["device_class"] = "temperature";
-        doc["unique_id"] = fmt::format("{}_bme280_temp", configs.hostname.value());
+        doc["unique_id"] = std::format("{}_bme280_temp", configs.hostname.value());
         fillCommonStuff(doc);
 
         std::string payload;
         serializeJson(doc, payload);
 
         publishQueue.push(std::make_tuple(
-                fmt::format("{}sensor/{}/temp/config", configs.hassMqttTopic.value(), configs.hostname.value()),
+                std::format("{}sensor/{}/temp/config", configs.hassMqttTopic.value(), configs.hostname.value()),
                 payload));
     }
 
     {
         doc.clear();
         doc["name"] = "BME280 Pressure";
-        doc["state_topic"] = fmt::format("{}/{}/status/bme280/pressure", configs.mqttTopic.value(), configs.hostname.value());
-        doc["availability_topic"] = fmt::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
+        doc["state_topic"] = std::format("{}/{}/status/bme280/pressure", configs.mqttTopic.value(), configs.hostname.value());
+        doc["availability_topic"] = std::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
         doc["payload_available"] = "true";
         doc["payload_not_available"] = "false";
         doc["unit_of_measurement"] = "Pa";
         doc["value_template"] = "{{ value_json }}";
         doc["state_class"] = "measurement";
         doc["device_class"] = "atmospheric_pressure";
-        doc["unique_id"] = fmt::format("{}_bme280_pressure", configs.hostname.value());
+        doc["unique_id"] = std::format("{}_bme280_pressure", configs.hostname.value());
         fillCommonStuff(doc);
 
         std::string payload;
         serializeJson(doc, payload);
 
         publishQueue.push(std::make_tuple(
-                fmt::format("{}sensor/{}/pressure/config", configs.hassMqttTopic.value(), configs.hostname.value()),
+                std::format("{}sensor/{}/pressure/config", configs.hassMqttTopic.value(), configs.hostname.value()),
                 payload));
     }
 
     {
         doc.clear();
         doc["name"] = "BME280 Humidity";
-        doc["state_topic"] = fmt::format("{}/{}/status/bme280/humidity", configs.mqttTopic.value(), configs.hostname.value());
-        doc["availability_topic"] = fmt::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
+        doc["state_topic"] = std::format("{}/{}/status/bme280/humidity", configs.mqttTopic.value(), configs.hostname.value());
+        doc["availability_topic"] = std::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
         doc["payload_available"] = "true";
         doc["payload_not_available"] = "false";
         doc["unit_of_measurement"] = "%";
         doc["value_template"] = "{{ value_json }}";
         doc["state_class"] = "measurement";
         doc["device_class"] = "humidity";
-        doc["unique_id"] = fmt::format("{}_bme280_humidity", configs.hostname.value());
+        doc["unique_id"] = std::format("{}_bme280_humidity", configs.hostname.value());
         fillCommonStuff(doc);
 
         std::string payload;
         serializeJson(doc, payload);
 
         publishQueue.push(std::make_tuple(
-                fmt::format("{}sensor/{}/humidity/config", configs.hassMqttTopic.value(), configs.hostname.value()),
+                std::format("{}sensor/{}/humidity/config", configs.hassMqttTopic.value(), configs.hostname.value()),
                 payload));
     }
 #endif
@@ -348,79 +348,79 @@ void publishHomeassistantDiscovery()
     {
         doc.clear();
         doc["name"] = "WiFi Signal Strength";
-        doc["state_topic"] = fmt::format("{}/{}/status/sta/rssi", configs.mqttTopic.value(), configs.hostname.value());
-        doc["availability_topic"] = fmt::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
+        doc["state_topic"] = std::format("{}/{}/status/sta/rssi", configs.mqttTopic.value(), configs.hostname.value());
+        doc["availability_topic"] = std::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
         doc["payload_available"] = "true";
         doc["payload_not_available"] = "false";
         doc["unit_of_measurement"] = "dBm";
         doc["value_template"] = "{{ value_json }}";
         doc["state_class"] = "measurement";
         doc["device_class"] = "signal_strength";
-        doc["unique_id"] = fmt::format("{}_wifi_rssi", configs.hostname.value());
+        doc["unique_id"] = std::format("{}_wifi_rssi", configs.hostname.value());
         fillCommonStuff(doc);
 
         std::string payload;
         serializeJson(doc, payload);
 
         publishQueue.push(std::make_tuple(
-                fmt::format("{}sensor/{}/rssi/config", configs.hassMqttTopic.value(), configs.hostname.value()),
+                std::format("{}sensor/{}/rssi/config", configs.hassMqttTopic.value(), configs.hostname.value()),
                 payload));
     }
 
     {
         doc.clear();
         doc["name"] = "WiFi SSID";
-        doc["state_topic"] = fmt::format("{}/{}/status/sta/ssid", configs.mqttTopic.value(), configs.hostname.value());
-        doc["availability_topic"] = fmt::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
+        doc["state_topic"] = std::format("{}/{}/status/sta/ssid", configs.mqttTopic.value(), configs.hostname.value());
+        doc["availability_topic"] = std::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
         doc["payload_available"] = "true";
         doc["payload_not_available"] = "false";
         doc["value_template"] = "{{ value_json }}";
-        doc["unique_id"] = fmt::format("{}_wifi_ssid", configs.hostname.value());
+        doc["unique_id"] = std::format("{}_wifi_ssid", configs.hostname.value());
         fillCommonStuff(doc);
 
         std::string payload;
         serializeJson(doc, payload);
 
         publishQueue.push(std::make_tuple(
-                fmt::format("{}sensor/{}/ssid/config", configs.hassMqttTopic.value(), configs.hostname.value()),
+                std::format("{}sensor/{}/ssid/config", configs.hassMqttTopic.value(), configs.hostname.value()),
                 payload));
     }
 
     {
         doc.clear();
         doc["name"] = "WiFi BSSID";
-        doc["state_topic"] = fmt::format("{}/{}/status/sta/bssid", configs.mqttTopic.value(), configs.hostname.value());
-        doc["availability_topic"] = fmt::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
+        doc["state_topic"] = std::format("{}/{}/status/sta/bssid", configs.mqttTopic.value(), configs.hostname.value());
+        doc["availability_topic"] = std::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
         doc["payload_available"] = "true";
         doc["payload_not_available"] = "false";
         doc["value_template"] = "{{ value_json }}";
-        doc["unique_id"] = fmt::format("{}_wifi_bssid", configs.hostname.value());
+        doc["unique_id"] = std::format("{}_wifi_bssid", configs.hostname.value());
         fillCommonStuff(doc);
 
         std::string payload;
         serializeJson(doc, payload);
 
         publishQueue.push(std::make_tuple(
-                fmt::format("{}sensor/{}/bssid/config", configs.hassMqttTopic.value(), configs.hostname.value()),
+                std::format("{}sensor/{}/bssid/config", configs.hassMqttTopic.value(), configs.hostname.value()),
                 payload));
     }
 
     {
         doc.clear();
         doc["name"] = "WiFi IP";
-        doc["state_topic"] = fmt::format("{}/{}/status/sta/ip", configs.mqttTopic.value(), configs.hostname.value());
-        doc["availability_topic"] = fmt::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
+        doc["state_topic"] = std::format("{}/{}/status/sta/ip", configs.mqttTopic.value(), configs.hostname.value());
+        doc["availability_topic"] = std::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
         doc["payload_available"] = "true";
         doc["payload_not_available"] = "false";
         doc["value_template"] = "{{ value_json }}";
-        doc["unique_id"] = fmt::format("{}_wifi_ip", configs.hostname.value());
+        doc["unique_id"] = std::format("{}_wifi_ip", configs.hostname.value());
         fillCommonStuff(doc);
 
         std::string payload;
         serializeJson(doc, payload);
 
         publishQueue.push(std::make_tuple(
-                fmt::format("{}sensor/{}/ip/config", configs.hassMqttTopic.value(), configs.hostname.value()),
+                std::format("{}sensor/{}/ip/config", configs.hassMqttTopic.value(), configs.hostname.value()),
                 payload));
     }
 
@@ -429,29 +429,29 @@ void publishHomeassistantDiscovery()
     {
         doc.clear();
         doc["name"] = "Uptime";
-        doc["state_topic"] = fmt::format("{}/{}/status/time/millis", configs.mqttTopic.value(), configs.hostname.value());
-        doc["availability_topic"] = fmt::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
+        doc["state_topic"] = std::format("{}/{}/status/time/millis", configs.mqttTopic.value(), configs.hostname.value());
+        doc["availability_topic"] = std::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
         doc["unit_of_measurement"] = "ms";
         doc["value_template"] = "{{ value_json }}";
         doc["entity_class"] = "diagnostic";
         doc["device_class"] = "duration";
-        doc["unique_id"] = fmt::format("{}_uptime", configs.hostname.value());
+        doc["unique_id"] = std::format("{}_uptime", configs.hostname.value());
         fillCommonStuff(doc);
 
         std::string payload;
         serializeJson(doc, payload);
 
         publishQueue.push(std::make_tuple(
-                fmt::format("{}sensor/{}/uptime/config", configs.hassMqttTopic.value(), configs.hostname.value()),
+                std::format("{}sensor/{}/uptime/config", configs.hassMqttTopic.value(), configs.hostname.value()),
                 payload));
     }
 
     {
         doc.clear();
         doc["name"] = "Light";
-        doc["command_topic"] = fmt::format("{}/{}/set/light", configs.mqttTopic.value(), configs.hostname.value());
-        doc["state_topic"] = fmt::format("{}/{}/status/led/homeassistant", configs.mqttTopic.value(), configs.hostname.value());
-        doc["availability_topic"] = fmt::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
+        doc["command_topic"] = std::format("{}/{}/set/light", configs.mqttTopic.value(), configs.hostname.value());
+        doc["state_topic"] = std::format("{}/{}/status/led/homeassistant", configs.mqttTopic.value(), configs.hostname.value());
+        doc["availability_topic"] = std::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
         doc["payload_available"] = "true";
         doc["payload_not_available"] = "false";
         doc["brightness"] = true;
@@ -466,14 +466,14 @@ void publishHomeassistantDiscovery()
         }
 
         doc["schema"] = "json";
-        doc["unique_id"] = fmt::format("{}_light", configs.hostname.value());
+        doc["unique_id"] = std::format("{}_light", configs.hostname.value());
         fillCommonStuff(doc);
 
         std::string payload;
         serializeJson(doc, payload);
 
         publishQueue.push(std::make_tuple(
-                fmt::format("{}light/{}/light/config", configs.hassMqttTopic.value(), configs.hostname.value()),
+                std::format("{}light/{}/light/config", configs.hassMqttTopic.value(), configs.hostname.value()),
                 payload));
     }
 
@@ -505,8 +505,8 @@ void event_handler(void*, esp_event_base_t event_base, int32_t event_id_arg, voi
 
         mqttState = MqttState::Connected;
 
-        client.subscribe(fmt::format("{}/{}/set/#", configs.mqttTopic.value(), configs.hostname.value()).c_str(), 0);
-        client.publish(fmt::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value()).c_str(), "true", 0, 1);
+        client.subscribe(std::format("{}/{}/set/#", configs.mqttTopic.value(), configs.hostname.value()).c_str(), 0);
+        client.publish(std::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value()).c_str(), "true", 0, 1);
 
         break;
     case MQTT_EVENT_DISCONNECTED:
@@ -547,7 +547,7 @@ void init(std::string_view url)
 {
     espcpputils::RecursiveLockHelper guard{global::global_lock->handle};
 
-    static const std::string lastWillTopic = fmt::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
+    static const std::string lastWillTopic = std::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
     static constexpr const char * const lastWillMessage = "false";
     static constexpr const size_t lastWillMessageLen = std::char_traits<char>::length(lastWillMessage);
 
@@ -560,7 +560,7 @@ void init(std::string_view url)
                                                     espcpputils::CoreAffinity::Both);
         if (result != pdPASS)
         {
-            auto msg = fmt::format("failed creating mqtt task {}", result);
+            auto msg = std::format("failed creating mqtt task {}", result);
             ESP_LOGE(TAG, "%.*s", msg.size(), msg.data());
             return;
         }
@@ -571,7 +571,7 @@ void init(std::string_view url)
                                                     espcpputils::CoreAffinity::Both);
         if (result != pdPASS)
         {
-            auto msg = fmt::format("failed creating mqtt task {}", result);
+            auto msg = std::format("failed creating mqtt task {}", result);
             ESP_LOGE(TAG, "%.*s", msg.size(), msg.data());
             return;
         }

@@ -34,7 +34,7 @@ const LedAnimation& getFirstAnimation()
     return *animations[0];
 }
 
-std::expected<void, std::string> updateAnimation(LedAnimationName enumValue, ledmanager::LedArray& leds)
+std::expected<void, std::string> updateAnimation(const LedAnimationName enumValue, ledmanager::LedArray& leds)
 {
     LedAnimation* newAnimation{nullptr};
 
@@ -70,7 +70,7 @@ std::expected<void, std::string> updateAnimation(LedAnimationName enumValue, led
         return {};
     }
 
-    return std::unexpected(fmt::format("Animation '{}' not found ({})", toString(enumValue), std::to_underlying(enumValue)));
+    return std::unexpected(std::format("Animation '{}' not found ({})", toString(enumValue), std::to_underlying(enumValue)));
 }
 
 bool animationExists(LedAnimationName enumValue)
@@ -87,7 +87,6 @@ bool LedAnimation::needsUpdate() const
         return true;
     }
 
-    // return espchrono::ago(*m_lastUpdate) > getUpdateInterval() / m_speedMultiplier;
     return espchrono::ago(*m_lastUpdate) > getUpdateInterval() / configs.animationMultiplier.value();
 }
 } // namespace animation

@@ -2,10 +2,12 @@
 
 constexpr const char * const TAG = "ledmanager";
 
+// system includes
+#include <format>
+
 // 3rdparty lib includes
 #include <FastLED.h>
 #include <espchrono.h>
-#include <fmt/core.h>
 #include <recursivelockhelper.h>
 
 // local includes
@@ -231,6 +233,17 @@ void LedManager::render()
     upper.on(dotsOn);
     lower.on(dotsOn);
 
+    const auto overrideTimeoutConfig = configs.ledOverrideDigitsTimeout.value();
+
+    if (overrideTimeoutConfig && m_overrideTriggeredAt)
+    {
+        if (espchrono::ago(*m_overrideTriggeredAt) > espchrono::milliseconds32{overrideTimeoutConfig})
+        {
+            configs.write_config(configs.ledOverrideDigits, "");
+            m_overrideTriggeredAt.reset();
+        }
+    }
+
     if (const auto res = animation::updateAnimation(configs.ledAnimation.value(), leds); !res)
     {
         ESP_LOGE(TAG, "Failed to update animation: %.*s\n", res.error().size(), res.error().data());
@@ -241,7 +254,12 @@ void LedManager::render()
         {
             if (const auto& val = configs.ledOverrideDigits.value(); !val.empty())
             {
-                ledManager->setText(val);
+                const auto textChanged = ledManager->setText(val);
+
+                if (overrideTimeoutConfig && textChanged)
+                {
+                    m_overrideTriggeredAt = now;
+                }
             }
 
             switch (currentAnimation->renderType())
@@ -291,7 +309,7 @@ void LedManager::render()
 
 std::string LedManager::toString() const
 {
-    return fmt::format("LedManager digit0={} digit1={} digit2={} digit3={} upper={} lower={}",
+    return std::format("LedManager digit0={} digit1={} digit2={} digit3={} upper={} lower={}",
                        digits[0].toString(),
                        digits[1].toString(),
                        digits[2].toString(),
@@ -305,25 +323,38 @@ uint16_t LedManager::getFps()
     return FastLED.getFPS();
 }
 
-void LedManager::setText(const std::string_view text)
+bool LedManager::setText(const std::string_view text)
 {
+    bool changed = false;
+
     for (size_t i = 0; i < digits.size(); ++i)
     {
         if (i >= text.size())
         {
-            digits[i].setChar(' ');
+            if (digits[i].setChar(' '))
+            {
+                changed = true;
+            }
             continue;
         }
 
         if (const auto& c = text[i]; std::isalnum(c))
         {
-            digits[i].setChar(c);
+            if (digits[i].setChar(c))
+            {
+                changed = true;
+            }
         }
         else
         {
-            digits[i].setChar(' ');
+            if (digits[i].setChar(' '))
+            {
+                changed = true;
+            }
         }
     }
+
+    return changed;
 }
 
 const std::array<CRGB, HARDWARE_WS2812B_COUNT>& getLeds()

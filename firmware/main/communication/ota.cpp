@@ -44,7 +44,7 @@ void update()
     asyncOta->update();
 }
 
-std::expected<void, std::string> trigger(std::string_view url)
+std::expected<void, std::string> trigger(const std::string_view url)
 {
     if (!asyncOta)
         return std::unexpected("OTA not initialized");
@@ -183,7 +183,7 @@ const std::string& otaMessage()
 
 const std::optional<esp_app_desc_t>& otaAppDesc()
 {
-    static const std::optional<esp_app_desc_t> emptyAppDesc;
+    static constexpr std::optional<esp_app_desc_t> emptyAppDesc;
     if (!asyncOta)
         return emptyAppDesc;
 
