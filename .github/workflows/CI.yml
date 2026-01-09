@@ -148,7 +148,7 @@ jobs:
           echo "branch=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
 
       - name: Upload Build Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ws2812-clock_${{ matrix.node }}
           path: |
