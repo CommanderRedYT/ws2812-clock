@@ -60,7 +60,7 @@
             <form id="triggerOtaForm" action="/api/v1/triggerOta" method="get">
                 <div class="input-group mb-3">
                     <span class="input-group-text">Download Url</span>
-                    <input type="url" name="url" id="otaUrl" placeholder="http://github.com/CommanderRedYT/ws2812-clock/releases/download/.../ws2812-clock.bin" class="form-control">
+                    <input type="url" name="url" id="otaUrl" required placeholder="https://github.com/CommanderRedYT/ws2812-clock/releases/download/.../ws2812-clock.bin" class="form-control">
                     <button type="submit" id="triggerOta" class="btn btn-primary">Trigger OTA</button>
                 </div>
                 <div class="progress mb-3" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="height: 25px">
@@ -73,6 +73,7 @@
                     <div class="mb-3 flex-grow-1" id="currentOtaPartition"></div>
                     <div class="mb-3 flex-grow-1" id="otherOtaPartition"></div>
                 </div>
+                <input type="submit" class="d-none" />
             </form>
         </div>
         <div class="mb-3">
