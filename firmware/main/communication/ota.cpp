@@ -51,7 +51,7 @@ std::expected<void, std::string> trigger(const std::string_view url)
 
     espcpputils::RecursiveLockHelper lockHelper{global::global_lock->handle};
 
-    return asyncOta->trigger(url, {}, true, {}, {});
+    return asyncOta->trigger(url, {}, true, {}, {}, 1024);
 }
 
 std::expected<void, std::string> switchAppPartition()
