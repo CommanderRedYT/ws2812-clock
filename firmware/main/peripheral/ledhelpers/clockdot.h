@@ -21,7 +21,7 @@ public:
 
     void render();
 
-    void on(bool on) { m_on = on; }
+    void on(const bool on) { m_on = on; }
 
     bool on() const { return m_on; }
 
