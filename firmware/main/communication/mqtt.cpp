@@ -489,6 +489,7 @@ void publishHomeassistantDiscovery()
         doc["command_topic"] = std::format("{}/{}/set/digits", configs.mqttTopic.value(), configs.hostname.value());
         doc["state_topic"] = std::format("{}/{}/status/led/text", configs.mqttTopic.value(), configs.hostname.value());
         doc["availability_topic"] = std::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
+        doc["value_template"] = "{{ value_json }}";
         doc["payload_available"] = "true";
         doc["payload_not_available"] = "false";
 
