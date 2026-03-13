@@ -16,6 +16,7 @@ constexpr const char * const TAG = "webserver_api";
 #include <recursivelockhelper.h>
 
 // local includes
+#include "communication/mqtt.h"
 #include "communication/ota.h"
 #include "helper/configapihelper.h"
 #include "helper/status.h"
@@ -195,6 +196,8 @@ esp_err_t api_set_via_get_handler(httpd_req_t* req)
         ESP_LOGE(TAG, "Failed to send response: %s", esp_err_to_name(res));
         return res;
     }
+
+    mqtt::force_publish_status();
 
     return ESP_OK;
 }

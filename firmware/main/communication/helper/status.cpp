@@ -91,6 +91,8 @@ esp_err_t generateStatusJson(JsonObject& statusObj)
             colorObj["r"] = primaryColor.r;
             colorObj["g"] = primaryColor.g;
             colorObj["b"] = primaryColor.b;
+
+            ledObj["text"] = configs.ledOverrideDigits.value();
         }
     }
 

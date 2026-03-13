@@ -18,4 +18,6 @@ void begin();
 
 void update();
 
+void force_publish_status();
+
 } // namespace mqtt

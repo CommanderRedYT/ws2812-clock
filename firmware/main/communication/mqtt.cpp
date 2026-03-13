@@ -142,8 +142,8 @@ std::string format_error(esp_mqtt_error_codes_t* error_handle)
 
             ESP_LOGI(TAG, "mqtt_receive_handle: received message on topic %s: %s", std::get<0>(*entry).c_str(), std::get<1>(*entry).c_str());
 
-            // {mqttTopic}/{hostname}/set/brightness
-            // {mqttTopic}/{hostname}/set/animation
+            // {mqttTopic}/{hostname}/set/light
+            // {mqttTopic}/{hostname}/set/digits
 
             if (std::get<0>(*entry).find(std::format("{}/{}/set/", configs.mqttTopic.value(), configs.hostname.value())) == 0)
             {
@@ -207,6 +207,12 @@ std::string format_error(esp_mqtt_error_codes_t* error_handle)
                             configs.write_config(configs.tertiaryColor, cpputils::ColorHelper{r, g, b});
                         }
                     }
+
+                    lastMqttPublish = std::nullopt;
+                }
+                else if (key == "digits")
+                {
+                    configs.write_config(configs.ledOverrideDigits, value);
 
                     lastMqttPublish = std::nullopt;
                 }
@@ -477,6 +483,27 @@ void publishHomeassistantDiscovery()
                 payload));
     }
 
+    {
+        doc.clear();
+        doc["name"] = "Text";
+        doc["command_topic"] = std::format("{}/{}/set/digits", configs.mqttTopic.value(), configs.hostname.value());
+        doc["state_topic"] = std::format("{}/{}/status/led/text", configs.mqttTopic.value(), configs.hostname.value());
+        doc["availability_topic"] = std::format("{}/{}/online", configs.mqttTopic.value(), configs.hostname.value());
+        doc["payload_available"] = "true";
+        doc["payload_not_available"] = "false";
+
+        doc["schema"] = "json";
+        doc["unique_id"] = std::format("{}_text", configs.hostname.value());
+        fillCommonStuff(doc);
+
+        std::string payload;
+        serializeJson(doc, payload);
+
+        publishQueue.push(std::make_tuple(
+                std::format("{}text/{}/text/config", configs.hassMqttTopic.value(), configs.hostname.value()),
+                payload));
+    }
+
     mqttHassPublished = true;
 }
 
@@ -726,6 +753,11 @@ void update()
     {
         publishHomeassistantDiscovery();
     }
+}
+
+void force_publish_status()
+{
+    lastMqttPublish = std::nullopt;
 }
 
 } // namespace mqtt
