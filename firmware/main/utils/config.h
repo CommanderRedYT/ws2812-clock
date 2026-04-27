@@ -442,7 +442,7 @@ public:
         bool allowReset() const final { return true; }
         const char *nvsName() const final { return "mqttUrl"; }
         std::string defaultValue() const final { return "mqtt://test.mosquitto.org:1883"; }
-        ConfigConstraintReturnType checkValue(value_t value) const final { return StringMaxSize<64>(value); }
+        ConfigConstraintReturnType checkValue(value_t value) const final { return StringMaxSize<128>(value); }
     } mqttUrl;
     struct : ConfigWrapper<std::string>
     {
